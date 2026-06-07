@@ -102,7 +102,7 @@ Unlike ordinary toolboxes that only provide basic spreadsheet operations, this a
 - Typical use cases: internal enterprise systems, weather/finance/government open data feeds
 
 #### 🤖 AI Chat & Natural Language Excel Operations (Major Update in v2.5)
-- Supports 14 mainstream LLM providers: DeepSeek, Qwen, Kimi, ChatGLM, ChatGPT, Claude, and more
+- Supports 14 mainstream LLM providers: DeepSeek, Qwen, Kimi, GLM, ChatGPT, Claude, and more
 - Supports local models via **Ollama / LM Studio / vLLM / llama.cpp** (data stays on your machine)
 - Automatically detects model capabilities, intelligently switches between Function Calling and Prompt Engineering modes
 - **Skills plug-in architecture**: Load third-party extensions via the standard ISkill interface — 24 built-in skills covering workbooks, worksheets, cells, ranges, formatting, charts, pivot tables, financial analysis, and more
