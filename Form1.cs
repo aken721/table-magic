@@ -172,8 +172,11 @@ namespace TableMagic
                                 sheet_listbox.Items.Add(worksheet_name);
                             }));
                         }
+                        sheet_listbox.Invoke((MethodInvoker)(() =>
+                        {
+                            sheet_listbox.Refresh();
+                        }));
                     });
-                    sheet_listbox.Refresh();
                     break;
 
                 //实用功能汇总

@@ -41,7 +41,7 @@
     <PublishUrl>ftp://localhost/</PublishUrl>
     <InstallUrl>http://localhost/TableMagic/</InstallUrl>
     <TargetCulture>zh-chs</TargetCulture>
-    <ApplicationVersion>2.5.1.0</ApplicationVersion>
+    <ApplicationVersion>2.5.2.0</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -188,7 +188,9 @@
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="System" />
+    <Reference Include="System">
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\System.dll</HintPath>
+    </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
@@ -320,6 +322,7 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <None Include="TableMagic_1_TemporaryKey.pfx" />
     <None Include="TableMagic_TemporaryKey.pfx" />
     <None Include="Properties\Resources\switch.png" />
     <None Include="Properties\Resources\document.ico" />
@@ -368,6 +371,9 @@
     <EmbeddedResource Include="Ribbon1.resx">
       <DependentUpon>Ribbon1.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ScreenCaptureForm.resx">
+      <DependentUpon>ScreenCaptureForm.cs</DependentUpon>
+    </EmbeddedResource>
     <Content Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -383,6 +389,12 @@
     </Compile>
     <Compile Include="Ribbon1.Designer.cs">
       <DependentUpon>Ribbon1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ScreenCaptureForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ScreenCaptureForm.Designer.cs">
+      <DependentUpon>ScreenCaptureForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ThisAddIn.cs">
       <SubType>Code</SubType>
@@ -848,10 +860,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>TableMagic_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>TableMagic_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>DE5B68A9F8D606B7FD92C3936CD8C3021C86A65C</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>5CF959BE5306119F8501746551789248C60F8030</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>

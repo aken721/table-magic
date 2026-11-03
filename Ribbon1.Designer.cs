@@ -57,19 +57,37 @@ namespace TableMagic
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl20 = this.Factory.CreateRibbonDropDownItem();
             this.tab1 = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
+            this.Excel_extend = this.Factory.CreateRibbonButton();
             this.separator4 = this.Factory.CreateRibbonSeparator();
+            this.confirm_spotlight = this.Factory.CreateRibbonToggleButton();
             this.box4 = this.Factory.CreateRibbonBox();
             this.spotlightDropDown = this.Factory.CreateRibbonDropDown();
             this.separator5 = this.Factory.CreateRibbonSeparator();
+            this.scan_button = this.Factory.CreateRibbonButton();
+            this.screenShot_splitButton = this.Factory.CreateRibbonSplitButton();
+            this.btnCurrent = this.Factory.CreateRibbonButton();
+            this.btnHidden = this.Factory.CreateRibbonButton();
+            this.separator2 = this.Factory.CreateRibbonSeparator();
             this.group5 = this.Factory.CreateRibbonGroup();
+            this.management_splitButton = this.Factory.CreateRibbonSplitButton();
+            this.fapiao_button = this.Factory.CreateRibbonButton();
+            this.doc_button = this.Factory.CreateRibbonButton();
+            this.extract_from_doc_button = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
+            this.Send_mail = this.Factory.CreateRibbonButton();
             this.separator7 = this.Factory.CreateRibbonSeparator();
+            this.btnTimer = this.Factory.CreateRibbonButton();
             this.group3 = this.Factory.CreateRibbonGroup();
+            this.Files_read = this.Factory.CreateRibbonButton();
             this.separator1 = this.Factory.CreateRibbonSeparator();
+            this.File_rename = this.Factory.CreateRibbonButton();
             this.separator3 = this.Factory.CreateRibbonSeparator();
+            this.delandmove_button = this.Factory.CreateRibbonButton();
             this.box6 = this.Factory.CreateRibbonBox();
+            this.Select_f_or_d = this.Factory.CreateRibbonToggleButton();
             this.checkBoxAll = this.Factory.CreateRibbonCheckBox();
             this.group4 = this.Factory.CreateRibbonGroup();
+            this.to_pdf_button = this.Factory.CreateRibbonButton();
             this.box2 = this.Factory.CreateRibbonBox();
             this.sheet_export_comboBox = this.Factory.CreateRibbonComboBox();
             this.export_type_comboBox = this.Factory.CreateRibbonComboBox();
@@ -80,34 +98,20 @@ namespace TableMagic
             this.group6 = this.Factory.CreateRibbonGroup();
             this.box1 = this.Factory.CreateRibbonBox();
             this.buttonGroup1 = this.Factory.CreateRibbonButtonGroup();
+            this.Select_mp3_button = this.Factory.CreateRibbonButton();
+            this.Mode_button = this.Factory.CreateRibbonButton();
             this.buttonGroup2 = this.Factory.CreateRibbonButtonGroup();
+            this.Play_button = this.Factory.CreateRibbonButton();
+            this.Stop_button = this.Factory.CreateRibbonButton();
+            this.Next_button = this.Factory.CreateRibbonButton();
+            this.Previous_button = this.Factory.CreateRibbonButton();
             this.group7 = this.Factory.CreateRibbonGroup();
+            this.deepseek_api_button = this.Factory.CreateRibbonButton();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.box5 = this.Factory.CreateRibbonBox();
             this.separator6 = this.Factory.CreateRibbonSeparator();
-            this.Excel_extend = this.Factory.CreateRibbonButton();
-            this.confirm_spotlight = this.Factory.CreateRibbonToggleButton();
-            this.scan_button = this.Factory.CreateRibbonButton();
-            this.management_splitButton = this.Factory.CreateRibbonSplitButton();
-            this.fapiao_button = this.Factory.CreateRibbonButton();
-            this.doc_button = this.Factory.CreateRibbonButton();
-            this.extract_from_doc_button = this.Factory.CreateRibbonButton();
-            this.Send_mail = this.Factory.CreateRibbonButton();
-            this.btnTimer = this.Factory.CreateRibbonButton();
-            this.Files_read = this.Factory.CreateRibbonButton();
-            this.File_rename = this.Factory.CreateRibbonButton();
-            this.delandmove_button = this.Factory.CreateRibbonButton();
-            this.Select_f_or_d = this.Factory.CreateRibbonToggleButton();
-            this.to_pdf_button = this.Factory.CreateRibbonButton();
-            this.Select_mp3_button = this.Factory.CreateRibbonButton();
-            this.Mode_button = this.Factory.CreateRibbonButton();
-            this.Play_button = this.Factory.CreateRibbonButton();
-            this.Stop_button = this.Factory.CreateRibbonButton();
-            this.Next_button = this.Factory.CreateRibbonButton();
-            this.Previous_button = this.Factory.CreateRibbonButton();
-            this.deepseek_api_button = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.box4.SuspendLayout();
@@ -145,12 +149,32 @@ namespace TableMagic
             this.group1.Items.Add(this.box4);
             this.group1.Items.Add(this.separator5);
             this.group1.Items.Add(this.scan_button);
+            this.group1.Items.Add(this.screenShot_splitButton);
+            this.group1.Items.Add(this.separator2);
             this.group1.Label = "表工具";
             this.group1.Name = "group1";
+            // 
+            // Excel_extend
+            // 
+            this.Excel_extend.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.Excel_extend.Image = global::TableMagic.Properties.Resources.excel;
+            this.Excel_extend.Label = "Excel表操作";
+            this.Excel_extend.Name = "Excel_extend";
+            this.Excel_extend.ShowImage = true;
+            this.Excel_extend.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Excel_extend_Click);
             // 
             // separator4
             // 
             this.separator4.Name = "separator4";
+            // 
+            // confirm_spotlight
+            // 
+            this.confirm_spotlight.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.confirm_spotlight.Image = global::TableMagic.Properties.Resources.spotlight_close;
+            this.confirm_spotlight.Label = "打开聚光灯";
+            this.confirm_spotlight.Name = "confirm_spotlight";
+            this.confirm_spotlight.ShowImage = true;
+            this.confirm_spotlight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.confirm_spotlight_Click);
             // 
             // box4
             // 
@@ -190,11 +214,82 @@ namespace TableMagic
             // 
             this.separator5.Name = "separator5";
             // 
+            // scan_button
+            // 
+            this.scan_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.scan_button.Image = global::TableMagic.Properties.Resources.QR;
+            this.scan_button.Label = "识别二维码";
+            this.scan_button.Name = "scan_button";
+            this.scan_button.ShowImage = true;
+            this.scan_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.scan_button_Click);
+            // 
+            // screenShot_splitButton
+            // 
+            this.screenShot_splitButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.screenShot_splitButton.Image = global::TableMagic.Properties.Resources.screenshot;
+            this.screenShot_splitButton.Items.Add(this.btnCurrent);
+            this.screenShot_splitButton.Items.Add(this.btnHidden);
+            this.screenShot_splitButton.Label = "截图";
+            this.screenShot_splitButton.Name = "screenShot_splitButton";
+            this.screenShot_splitButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.screenShot_splitButton_Click);
+            // 
+            // btnCurrent
+            // 
+            this.btnCurrent.Label = "当前窗口截图";
+            this.btnCurrent.Name = "btnCurrent";
+            this.btnCurrent.ShowImage = true;
+            this.btnCurrent.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnCurrent_Click);
+            // 
+            // btnHidden
+            // 
+            this.btnHidden.Label = "隐藏窗口截图";
+            this.btnHidden.Name = "btnHidden";
+            this.btnHidden.ShowImage = true;
+            this.btnHidden.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnHidden_Click);
+            // 
+            // separator2
+            // 
+            this.separator2.Name = "separator2";
+            // 
             // group5
             // 
             this.group5.Items.Add(this.management_splitButton);
             this.group5.Label = "管理工具";
             this.group5.Name = "group5";
+            // 
+            // management_splitButton
+            // 
+            this.management_splitButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.management_splitButton.Image = global::TableMagic.Properties.Resources.management;
+            this.management_splitButton.Items.Add(this.fapiao_button);
+            this.management_splitButton.Items.Add(this.doc_button);
+            this.management_splitButton.Items.Add(this.extract_from_doc_button);
+            this.management_splitButton.Label = "内部管理";
+            this.management_splitButton.Name = "management_splitButton";
+            // 
+            // fapiao_button
+            // 
+            this.fapiao_button.Image = global::TableMagic.Properties.Resources.Fapiao;
+            this.fapiao_button.Label = "发票批量导入";
+            this.fapiao_button.Name = "fapiao_button";
+            this.fapiao_button.ShowImage = true;
+            this.fapiao_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.fapiao_button_Click);
+            // 
+            // doc_button
+            // 
+            this.doc_button.Image = global::TableMagic.Properties.Resources.document;
+            this.doc_button.Label = "文档批量生成";
+            this.doc_button.Name = "doc_button";
+            this.doc_button.ShowImage = true;
+            this.doc_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.doc_button_Click);
+            // 
+            // extract_from_doc_button
+            // 
+            this.extract_from_doc_button.Image = global::TableMagic.Properties.Resources.extract_from_doc;
+            this.extract_from_doc_button.Label = "文档批量提取";
+            this.extract_from_doc_button.Name = "extract_from_doc_button";
+            this.extract_from_doc_button.ShowImage = true;
+            this.extract_from_doc_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.extract_from_doc_button_Click);
             // 
             // group2
             // 
@@ -204,9 +299,27 @@ namespace TableMagic
             this.group2.Label = "自动化工具";
             this.group2.Name = "group2";
             // 
+            // Send_mail
+            // 
+            this.Send_mail.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.Send_mail.Image = global::TableMagic.Properties.Resources.email;
+            this.Send_mail.Label = "Email群发";
+            this.Send_mail.Name = "Send_mail";
+            this.Send_mail.ShowImage = true;
+            this.Send_mail.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Send_mail_Click);
+            // 
             // separator7
             // 
             this.separator7.Name = "separator7";
+            // 
+            // btnTimer
+            // 
+            this.btnTimer.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.btnTimer.Image = global::TableMagic.Properties.Resources.timer;
+            this.btnTimer.Label = "定时任务";
+            this.btnTimer.Name = "btnTimer";
+            this.btnTimer.ShowImage = true;
+            this.btnTimer.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnTimer_Click);
             // 
             // group3
             // 
@@ -219,13 +332,40 @@ namespace TableMagic
             this.group3.Label = "文件/文件夹工具";
             this.group3.Name = "group3";
             // 
+            // Files_read
+            // 
+            this.Files_read.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.Files_read.Image = global::TableMagic.Properties.Resources.read;
+            this.Files_read.Label = "批读文件名";
+            this.Files_read.Name = "Files_read";
+            this.Files_read.ShowImage = true;
+            this.Files_read.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Files_read_Click);
+            // 
             // separator1
             // 
             this.separator1.Name = "separator1";
             // 
+            // File_rename
+            // 
+            this.File_rename.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.File_rename.Image = global::TableMagic.Properties.Resources.write;
+            this.File_rename.Label = "批量重命名";
+            this.File_rename.Name = "File_rename";
+            this.File_rename.ShowImage = true;
+            this.File_rename.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.File_rename_Click);
+            // 
             // separator3
             // 
             this.separator3.Name = "separator3";
+            // 
+            // delandmove_button
+            // 
+            this.delandmove_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.delandmove_button.Image = global::TableMagic.Properties.Resources.移动文件;
+            this.delandmove_button.Label = "批量删或移";
+            this.delandmove_button.Name = "delandmove_button";
+            this.delandmove_button.ShowImage = true;
+            this.delandmove_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.delandmove_button_Click);
             // 
             // box6
             // 
@@ -233,6 +373,14 @@ namespace TableMagic
             this.box6.Items.Add(this.Select_f_or_d);
             this.box6.Items.Add(this.checkBoxAll);
             this.box6.Name = "box6";
+            // 
+            // Select_f_or_d
+            // 
+            this.Select_f_or_d.Image = global::TableMagic.Properties.Resources.Radio_Button_off;
+            this.Select_f_or_d.Label = "文件名";
+            this.Select_f_or_d.Name = "Select_f_or_d";
+            this.Select_f_or_d.ShowImage = true;
+            this.Select_f_or_d.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Select_f_or_d_Click);
             // 
             // checkBoxAll
             // 
@@ -248,6 +396,15 @@ namespace TableMagic
             this.group4.Items.Add(this.box3);
             this.group4.Label = "PDF工具";
             this.group4.Name = "group4";
+            // 
+            // to_pdf_button
+            // 
+            this.to_pdf_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.to_pdf_button.Image = global::TableMagic.Properties.Resources.pdf;
+            this.to_pdf_button.Label = "转为PDF";
+            this.to_pdf_button.Name = "to_pdf_button";
+            this.to_pdf_button.ShowImage = true;
+            this.to_pdf_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.to_pdf_button_Click);
             // 
             // box2
             // 
@@ -351,155 +508,6 @@ namespace TableMagic
             this.buttonGroup1.Items.Add(this.Mode_button);
             this.buttonGroup1.Name = "buttonGroup1";
             // 
-            // buttonGroup2
-            // 
-            this.buttonGroup2.Items.Add(this.Play_button);
-            this.buttonGroup2.Items.Add(this.Stop_button);
-            this.buttonGroup2.Items.Add(this.Next_button);
-            this.buttonGroup2.Items.Add(this.Previous_button);
-            this.buttonGroup2.Name = "buttonGroup2";
-            // 
-            // group7
-            // 
-            this.group7.Items.Add(this.deepseek_api_button);
-            this.group7.Label = "AI工具";
-            this.group7.Name = "group7";
-            // 
-            // timer1
-            // 
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // box5
-            // 
-            this.box5.Name = "box5";
-            // 
-            // separator6
-            // 
-            this.separator6.Name = "separator6";
-            // 
-            // Excel_extend
-            // 
-            this.Excel_extend.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.Excel_extend.Image = global::TableMagic.Properties.Resources.excel;
-            this.Excel_extend.Label = "Excel表操作";
-            this.Excel_extend.Name = "Excel_extend";
-            this.Excel_extend.ShowImage = true;
-            this.Excel_extend.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Excel_extend_Click);
-            // 
-            // confirm_spotlight
-            // 
-            this.confirm_spotlight.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.confirm_spotlight.Image = global::TableMagic.Properties.Resources.spotlight_close;
-            this.confirm_spotlight.Label = "打开聚光灯";
-            this.confirm_spotlight.Name = "confirm_spotlight";
-            this.confirm_spotlight.ShowImage = true;
-            this.confirm_spotlight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.confirm_spotlight_Click);
-            // 
-            // scan_button
-            // 
-            this.scan_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.scan_button.Image = global::TableMagic.Properties.Resources.QR;
-            this.scan_button.Label = "识别二维码";
-            this.scan_button.Name = "scan_button";
-            this.scan_button.ShowImage = true;
-            this.scan_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.scan_button_Click);
-            // 
-            // management_splitButton
-            // 
-            this.management_splitButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.management_splitButton.Image = global::TableMagic.Properties.Resources.management;
-            this.management_splitButton.Items.Add(this.fapiao_button);
-            this.management_splitButton.Items.Add(this.doc_button);
-            this.management_splitButton.Items.Add(this.extract_from_doc_button);
-            this.management_splitButton.Label = "内部管理";
-            this.management_splitButton.Name = "management_splitButton";
-            // 
-            // fapiao_button
-            // 
-            this.fapiao_button.Image = global::TableMagic.Properties.Resources.Fapiao;
-            this.fapiao_button.Label = "发票批量导入";
-            this.fapiao_button.Name = "fapiao_button";
-            this.fapiao_button.ShowImage = true;
-            this.fapiao_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.fapiao_button_Click);
-            // 
-            // doc_button
-            // 
-            this.doc_button.Image = global::TableMagic.Properties.Resources.document;
-            this.doc_button.Label = "文档批量生成";
-            this.doc_button.Name = "doc_button";
-            this.doc_button.ShowImage = true;
-            this.doc_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.doc_button_Click);
-            // 
-            // extract_from_doc_button
-            // 
-            this.extract_from_doc_button.Image = global::TableMagic.Properties.Resources.extract_from_doc;
-            this.extract_from_doc_button.Label = "文档批量提取";
-            this.extract_from_doc_button.Name = "extract_from_doc_button";
-            this.extract_from_doc_button.ShowImage = true;
-            this.extract_from_doc_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.extract_from_doc_button_Click);
-            // 
-            // Send_mail
-            // 
-            this.Send_mail.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.Send_mail.Image = global::TableMagic.Properties.Resources.email;
-            this.Send_mail.Label = "Email群发";
-            this.Send_mail.Name = "Send_mail";
-            this.Send_mail.ShowImage = true;
-            this.Send_mail.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Send_mail_Click);
-            // 
-            // btnTimer
-            // 
-            this.btnTimer.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.btnTimer.Image = global::TableMagic.Properties.Resources.timer;
-            this.btnTimer.Label = "定时任务";
-            this.btnTimer.Name = "btnTimer";
-            this.btnTimer.ShowImage = true;
-            this.btnTimer.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnTimer_Click);
-            // 
-            // Files_read
-            // 
-            this.Files_read.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.Files_read.Image = global::TableMagic.Properties.Resources.read;
-            this.Files_read.Label = "批读文件名";
-            this.Files_read.Name = "Files_read";
-            this.Files_read.ShowImage = true;
-            this.Files_read.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Files_read_Click);
-            // 
-            // File_rename
-            // 
-            this.File_rename.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.File_rename.Image = global::TableMagic.Properties.Resources.write;
-            this.File_rename.Label = "批量重命名";
-            this.File_rename.Name = "File_rename";
-            this.File_rename.ShowImage = true;
-            this.File_rename.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.File_rename_Click);
-            // 
-            // delandmove_button
-            // 
-            this.delandmove_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.delandmove_button.Image = global::TableMagic.Properties.Resources.移动文件;
-            this.delandmove_button.Label = "批量删或移";
-            this.delandmove_button.Name = "delandmove_button";
-            this.delandmove_button.ShowImage = true;
-            this.delandmove_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.delandmove_button_Click);
-            // 
-            // Select_f_or_d
-            // 
-            this.Select_f_or_d.Image = global::TableMagic.Properties.Resources.Radio_Button_off;
-            this.Select_f_or_d.Label = "文件名";
-            this.Select_f_or_d.Name = "Select_f_or_d";
-            this.Select_f_or_d.ShowImage = true;
-            this.Select_f_or_d.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Select_f_or_d_Click);
-            // 
-            // to_pdf_button
-            // 
-            this.to_pdf_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.to_pdf_button.Image = global::TableMagic.Properties.Resources.pdf;
-            this.to_pdf_button.Label = "转为PDF";
-            this.to_pdf_button.Name = "to_pdf_button";
-            this.to_pdf_button.ShowImage = true;
-            this.to_pdf_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.to_pdf_button_Click);
-            // 
             // Select_mp3_button
             // 
             this.Select_mp3_button.Image = global::TableMagic.Properties.Resources.no_open_fold;
@@ -519,6 +527,14 @@ namespace TableMagic
             this.Mode_button.ShowImage = true;
             this.Mode_button.ShowLabel = false;
             this.Mode_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Mode_button_Click);
+            // 
+            // buttonGroup2
+            // 
+            this.buttonGroup2.Items.Add(this.Play_button);
+            this.buttonGroup2.Items.Add(this.Stop_button);
+            this.buttonGroup2.Items.Add(this.Next_button);
+            this.buttonGroup2.Items.Add(this.Previous_button);
+            this.buttonGroup2.Name = "buttonGroup2";
             // 
             // Play_button
             // 
@@ -560,6 +576,12 @@ namespace TableMagic
             this.Previous_button.ShowLabel = false;
             this.Previous_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Previous_button_Click);
             // 
+            // group7
+            // 
+            this.group7.Items.Add(this.deepseek_api_button);
+            this.group7.Label = "AI工具";
+            this.group7.Name = "group7";
+            // 
             // deepseek_api_button
             // 
             this.deepseek_api_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -568,6 +590,18 @@ namespace TableMagic
             this.deepseek_api_button.Name = "deepseek_api_button";
             this.deepseek_api_button.ShowImage = true;
             this.deepseek_api_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.deepseek_api_button_Click);
+            // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // box5
+            // 
+            this.box5.Name = "box5";
+            // 
+            // separator6
+            // 
+            this.separator6.Name = "separator6";
             // 
             // Ribbon1
             // 
@@ -664,6 +698,10 @@ namespace TableMagic
         internal Microsoft.Office.Tools.Ribbon.RibbonButton fapiao_button;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton doc_button;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton extract_from_doc_button;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSplitButton screenShot_splitButton;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator2;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnCurrent;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnHidden;
     }
 
     partial class ThisRibbonCollection

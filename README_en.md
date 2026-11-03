@@ -4,7 +4,7 @@
 
 **The Excel Plugin That Does the Heavy Lifting**
 
-[🇨🇳 中文](./README.md) · [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) · [![Version](https://img.shields.io/badge/Version-v2.5.1-blue.svg)](https://gitee.com/aken721/table-magic/releases) · [![Platform](https://img.shields.io/badge/Platform-Office%20%2B%20WPS-orange.svg)]() · [![Stars](https://img.shields.io/badge/Stars-⭐%20Give%20a%20Star-yellow.svg)](https://gitee.com/aken721/table-magic)
+[🇨🇳 中文](./README.md) · [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) · [![Version](https://img.shields.io/badge/Version-v2.5.2-blue.svg)](https://gitee.com/aken721/table-magic/releases) · [![Platform](https://img.shields.io/badge/Platform-Office%20%2B%20WPS-orange.svg)]() · [![Stars](https://img.shields.io/badge/Stars-⭐%20Give%20a%20Star-yellow.svg)](https://gitee.com/aken721/table-magic)
 
 [📥 Download](https://gitee.com/aken721/table-magic/releases) · [🐛 Issues](https://gitee.com/aken721/table-magic/issues) · [📧 Custom Dev](mailto:aken721@163.com)
 
@@ -43,6 +43,15 @@ Unlike ordinary toolboxes that only provide basic spreadsheet operations, this a
 - **Batch Delete Sheets**: Delete multiple worksheets by rule
 - **Spotlight**: Highlights the entire row and column of the active cell; supports 6 color themes — no more losing your place
 - **Export to PDF**: Current sheet, all sheets to single PDF, or all sheets to separate PDFs with custom page size and scaling
+
+#### 📸 Screenshot (New in v2.5.2)
+
+- **Auto Window Detection**: Move the mouse to automatically highlight the window under the cursor with a blue border and transparent preview — similar to Windows/WeChat screenshot
+- **Drag-to-Select**: Hold left mouse button and drag to select any rectangular area
+- **Double-Click to Capture Window**: Double-click to capture the currently highlighted window
+- **Two Modes**: Current window screenshot (Excel stays visible) / Hidden window screenshot (minimize Excel first)
+- Screenshot is automatically copied to clipboard and inserted into the active worksheet at the selected cell, scaled proportionally to fit 20 columns × 10 rows
+- Multi-monitor support; Esc/right-click to cancel, Enter to confirm
 
 #### 🧾 Invoice Management (Unique Feature)
 - **XML Electronic Invoices**: Batch-import key invoice data into Excel

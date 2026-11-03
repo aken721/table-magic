@@ -4,7 +4,7 @@
 
 **装上它，Excel帮你摸鱼**
 
-[🇬🇧 English](./README_en.md) · [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) · [![Version](https://img.shields.io/badge/Version-v2.5.1-blue.svg)](https://gitee.com/aken721/table-magic/releases) · [![Platform](https://img.shields.io/badge/Platform-Office%20%2B%20WPS-orange.svg)]() · [![Stars](https://img.shields.io/badge/Stars-⭐%20Give%20a%20Star-yellow.svg)](https://gitee.com/aken721/table-magic)
+[🇬🇧 English](./README_en.md) · [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) · [![Version](https://img.shields.io/badge/Version-v2.5.2-blue.svg)](https://gitee.com/aken721/table-magic/releases) · [![Platform](https://img.shields.io/badge/Platform-Office%20%2B%20WPS-orange.svg)]() · [![Stars](https://img.shields.io/badge/Stars-⭐%20Give%20a%20Star-yellow.svg)](https://gitee.com/aken721/table-magic)
 
 [📥 立即下载](https://gitee.com/aken721/table-magic/releases) · [🐛 提交问题](https://gitee.com/aken721/table-magic/issues) · [📧 定制开发](mailto:aken721@163.com)
 
@@ -47,6 +47,15 @@
 - **批量删表**：按规则批量删除工作表
 - **聚光灯**：点击单元格时高亮整行整列，支持6种主题色切换，告别"找行找列"烦恼
 - **Excel转PDF**：支持当前表、全部表转单PDF、全部表转多PDF，可设置页面大小和缩放
+
+#### 📸 截图功能（v2.5.2新增）
+
+- **窗口自动识别**：鼠标移动时自动高亮所在窗口，蓝色边框 + 透亮预览，类似 Windows/微信截图
+- **画框截图**：按住鼠标左键拖动选择任意区域
+- **双击截取窗口**：双击直接截取当前高亮窗口
+- **两种模式**：当前窗口截图（不隐藏Excel）/ 隐藏窗口截图（先最小化Excel再截图）
+- 截图后自动复制到剪贴板，并插入当前工作表选中单元格，按比例缩放到 20列×10行 大小
+- 支持多显示器，Esc/右键取消，Enter确认
 
 #### 🧾 发票管理（独有功能）
 

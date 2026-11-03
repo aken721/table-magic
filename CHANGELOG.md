@@ -5,6 +5,22 @@ All notable changes are documented here, following the [Keep a Changelog](https:
 
 ---
 
+## [v2.5.2.0] - 2026-11-03
+
+### ✨ 新增 | Added
+- **截图功能**：新增 Ribbon 截图按钮（screenShot_splitButton），支持窗口识别与画框截图
+  - **窗口自动识别**：鼠标移动时自动高亮所在窗口（蓝色边框 + 透亮预览），类似 Windows/微信截图
+  - **画框截图**：按住鼠标左键拖动选择任意区域
+  - **双击截取窗口**：双击直接截取当前高亮窗口
+  - **两种模式**：当前窗口截图（不隐藏Excel）/ 隐藏窗口截图（先最小化Excel再截图）
+  - 截图后自动复制到剪贴板，并插入当前工作表选中单元格，按比例缩放到 20列×10行 大小
+  - 支持多显示器全屏覆盖，Esc/右键取消，Enter确认
+
+### 🐛 修复 | Fixed
+- 修复批量导删选项卡切换时 `sheet_listbox.Refresh()` 跨线程操作异常（VSTO 异步线程模型问题）
+
+---
+
 ## [v2.5.1.0] - 2026-04-21
 
 ### ✨ 新增 | Added

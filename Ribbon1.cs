@@ -1694,6 +1694,77 @@ namespace TableMagic
             Form11 form11= new Form11();
             form11.Show();
         }
+
+        //截图：点击splitButton本体，默认当前窗口截图
+        private void screenShot_splitButton_Click(object sender, RibbonControlEventArgs e)
+        {
+            StartScreenCapture(false);
+        }
+
+        //当前窗口截图
+        private void btnCurrent_Click(object sender, RibbonControlEventArgs e)
+        {
+            StartScreenCapture(false);
+        }
+
+        //隐藏当前窗口截图
+        private void btnHidden_Click(object sender, RibbonControlEventArgs e)
+        {
+            StartScreenCapture(true);
+        }
+
+        private void StartScreenCapture(bool hideExcel)
+        {
+            IntPtr excelHwnd = IntPtr.Zero;
+            try
+            {
+                if (hideExcel)
+                {
+                    excelHwnd = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+                    if (excelHwnd != IntPtr.Zero)
+                    {
+                        NativeMethods.ShowWindow(excelHwnd, NativeMethods.SW_MINIMIZE);
+                        System.Threading.Thread.Sleep(150);
+                    }
+                }
+
+                ScreenCaptureForm captureForm = new ScreenCaptureForm();
+                DialogResult result = captureForm.ShowDialog();
+
+                if (result == DialogResult.OK && captureForm.CapturedImage != null)
+                {
+                    try
+                    {
+                        System.Windows.Forms.Clipboard.SetImage(captureForm.CapturedImage);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine("复制到剪贴板失败: " + ex.Message);
+                    }
+                    ScreenCaptureForm.InsertImageIntoExcel(captureForm.CapturedImage);
+                }
+            }
+            finally
+            {
+                if (hideExcel && excelHwnd != IntPtr.Zero)
+                {
+                    NativeMethods.ShowWindow(excelHwnd, NativeMethods.SW_RESTORE);
+                    NativeMethods.SetForegroundWindow(excelHwnd);
+                }
+            }
+        }
+    }
+
+    internal static class NativeMethods
+    {
+        public const int SW_MINIMIZE = 6;
+        public const int SW_RESTORE = 9;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
     }
 }
 
