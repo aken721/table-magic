@@ -149,10 +149,9 @@
 
 ### 📥 安装方式
 
-1. 前往 [Release页面](https://gitee.com/aken721/table-magic/releases) 下载 `.msi` 安装包
-2. v2.4.6.2起需同时下载 `InvoiceOCR.7z`（OCR模型），解压到插件安装目录
-3. 完整包可从 [GitHub](https://github.com/aken721/table-magic/releases) 或 [GitCode](https://gitcode.com/aken721/table-magic/releases) 下载
-4. 安装后打开Excel，功能区自动出现 **"智能工具箱"** 选项卡（后续版本将更名为"万象插件"）
+1. 前往 [GitHub](https://github.com/aken721/table-magic/releases) 或 [GitCode](https://gitcode.com/aken721/table-magic/releases) 的 Release 页面下载 `.msi` 安装包
+2. 安装后打开 Excel，功能区自动出现 **"万象插件"** 选项卡（v2.5.1.0 之前版本选项卡名为"智能工具箱"）
+3. 安装包已配置 WPS 注册表支持项，WPS 打开可直接使用
 
 ### 🔧 系统要求
 
