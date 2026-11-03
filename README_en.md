@@ -135,10 +135,9 @@ See [TableMagic.Cli/README.md](./TableMagic.Cli/README.md) for details.
 
 ### 📥 Installation
 
-1. Go to the [Releases page](https://gitee.com/aken721/table-magic/releases) and download the `.msi` installer
-2. Since v2.4.6.2, also download `InvoiceOCR.7z` (OCR model) and extract it to the add-in installation directory
-3. Full packages are also available on [GitHub](https://github.com/aken721/table-magic/releases) and [GitCode](https://gitcode.com/akin721/table-magic/releases)
-4. After installation, open Excel — the **"Intelligent Toolbox"** tab will appear automatically in the ribbon (to be renamed "TableMagic" in a future release)
+1. Go to the [GitHub](https://github.com/aken721/table-magic/releases) or [GitCode](https://gitcode.com/akin721/table-magic/releases) Releases page and download the `.msi` installer
+2. After installation, open Excel — the **"Wanxiang Plugin"** tab will appear automatically in the ribbon (versions prior to v2.5.1.0 use the tab name "Intelligent Toolbox")
+3. The installer includes WPS registry support — works directly in WPS Office
 
 ### 🔧 System Requirements
 
