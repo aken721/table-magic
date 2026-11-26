@@ -43,6 +43,11 @@ namespace TableMagic
         private List<string> activeWorkBook_sheet_names = new List<string>();     //当前工作簿中所有工作表名称，初始化时首次写入
         private List<string> new_sheet_names = new List<string>();       //打开后新建表所有表名
 
+        //动态图：标题文本框占位符文本
+        private const string TitlePlaceholderText = "（可不填）";
+        //字体列表只加载一次（当前加载代码已注释，保留以备重新启用）
+        private bool _fontsLoaded = false;
+
         public Form1()
         {
             InitializeComponent();
@@ -114,6 +119,11 @@ namespace TableMagic
             BC_radioButton.Checked = false;
 
             function_title_label.Text = "请选择所需使用的功能";
+
+            //动态图：初始化三个标题文本框的占位符行为
+            InitTitlePlaceholders();
+            sheetType_select_comboBox.SelectedIndexChanged += sheetType_select_comboBox_SelectedIndexChanged;
+            dpGroupBy2_comboBox.SelectedIndexChanged += dpGroupBy2_comboBox_SelectedIndexChanged;
         }
 
         //重绘选项页布局
@@ -131,6 +141,10 @@ namespace TableMagic
         //选项页初始化
         private async void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // async void 事件处理器无法被调用方捕获异常；一旦抛出未处理异常，
+            // VSTO 宿主下会直接终止 Excel 进程。这里统一兜底，仅记录日志。
+            try
+            {
             switch (tabControl1.SelectedIndex)
             {
                 //分表
@@ -212,8 +226,10 @@ namespace TableMagic
                 //数据库表提取
                 case 4:
                     database_result_label.Text = string.Empty;
+                    // 先解除数据源绑定，否则 Items.Clear() 会抛
+                    // ArgumentException: "设置 DataSource 属性后无法修改项集合。"
+                    dbsheet_comboBox.DataSource = null;
                     dbsheet_comboBox.Items.Clear();
-                    dbexport_result_label.Text = string.Empty;
                     dbexport_result_label.Text = string.Empty;
                     find_keywordclear_pictureBox.Visible = false;
                     break;
@@ -229,7 +245,8 @@ namespace TableMagic
                 case 6:
                     this.TopMost = false;
                     chart_select_comboBox.SelectedIndex = 0;
-                    LoadFontsToComboBox(comboBoxFonts);
+                    //字体选择当前未启用，不再枚举系统字体（保留调用以备重新启用）
+                    //LoadFontsToComboBox(comboBoxFonts);
                     comboBoxTextDirection.SelectedIndex = 0;
                     //目前测试词云图中字体设定功能可能对中文不起作用，暂时隐藏
                     labelFonts.Visible = false;
@@ -250,6 +267,11 @@ namespace TableMagic
                     this.Dispose();
                     break;
             }
+            }
+            catch (Exception ex)
+            {
+                DbHelper.LogError("切换选项页", ex);
+            }
         }
 
         // 定义用于存储字体信息的类
@@ -260,8 +282,18 @@ namespace TableMagic
         }
 
         //在一个文本选择框中添加本机字体库中字体名称
+        //【字体选择当前未启用】整个方法体已注释，避免枚举系统字体造成界面卡顿；
+        //  保留方法签名与代码，取消注释即可重新启用。
         private void LoadFontsToComboBox(ComboBox comboBox)
         {
+            /*
+            // 字体枚举是重量级操作，且该下拉框当前处于隐藏状态；
+            // 只加载一次，避免每次切换到图表增强标签时重复枚举导致界面卡顿
+            if (_fontsLoaded) return;
+            _fontsLoaded = true;
+
+            comboBox.Items.Clear();
+
             // 获取系统安装的字体
             InstalledFontCollection fonts = new InstalledFontCollection();
             foreach (FontFamily font in fonts.Families)
@@ -272,7 +304,7 @@ namespace TableMagic
                 if (string.IsNullOrEmpty(englishName))
                     englishName = font.Name;
 
-                comboBoxFonts.Items.Add(new FontInfo
+                comboBox.Items.Add(new FontInfo
                 {
                     DisplayName = font.Name,
                     EnglishName = englishName
@@ -280,8 +312,9 @@ namespace TableMagic
             }
 
             // 设置显示属性为DisplayName
-            comboBoxFonts.DisplayMember = "DisplayName";
-            comboBoxFonts.Sorted = true;
+            comboBox.DisplayMember = "DisplayName";
+            comboBox.Sorted = true;
+            */
         }
 
         //限制指定数据起始行的ComboBox中只能输入数字
@@ -2695,13 +2728,26 @@ namespace TableMagic
         private void StartTimer()
         {
             aTimer.Interval = 3000;          //3 seconds
+            // 先取消再订阅，避免每次调用累积一个处理器
+            aTimer.Elapsed -= OnTimedEvent;
             aTimer.Elapsed += OnTimedEvent;
             aTimer.Enabled = true;
         }
 
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            HideLabel(run_result_label, false, "");
+            // 定时器在 ThreadPool 线程执行，异常若逸出会直接终止 Excel
+            try
+            {
+                if (run_result_label != null && !run_result_label.IsDisposed)
+                {
+                    HideLabel(run_result_label, false, "");
+                }
+            }
+            catch (Exception ex)
+            {
+                DbHelper.LogError("定时器回调", ex);
+            }
         }
 
 
@@ -2746,8 +2792,28 @@ namespace TableMagic
         //DataBase模块 运行按钮点击事件（读取数据库表，并在DataGridView中显示）
         private void dbrun_button_Click(object sender, EventArgs e)
         {
+            try
+            {
+                LoadDatabaseTablesFromInputs();
+            }
+            catch (Exception ex)
+            {
+                // 兜底捕获，避免异常被 Office/WinForms 宿主吞掉后“没有任何错误提示”
+                DbHelper.ReportError("数据库连接", ex);
+                database_result_label.Text = "数据库连接失败：" + ex.Message;
+            }
+        }
+
+        // 根据界面输入构建连接串并读取数据库表列表
+        private void LoadDatabaseTablesFromInputs()
+        {
+            string dbError = null;
+            // 先解绑再清空：DataSource 非空时调用 Items.Clear() 会抛
+            // InvalidOperationException（实际为 ArgumentException），此前会让 async void 事件处理器崩溃
+            dbsheet_comboBox.DataSource = null;
             dbsheet_comboBox.Items.Clear();
             tableNames.Clear();
+            dbsheet_dataGridView.DataSource = null;
             if (string.IsNullOrEmpty(dbaddress_textBox.Text))
             {
                 MessageBox.Show("数据库地址不能为空！", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -2761,12 +2827,12 @@ namespace TableMagic
                         string connectionString0 = $"server={dbaddress_textBox.Text};user={dbuser_textBox.Text};database={dbname_textBox.Text};port={dbport_textBox.Text};password={dbpwd_textBox.Text}";
 
                         // 连接到数据库并获取表名列表
-                        tableNames = MysqlDB.GetTableNames(connectionString0);
+                        tableNames = MysqlDB.GetTableNames(connectionString0, out dbError);
 
-                        if (tableNames.Count == 1 && tableNames[0].Contains(":"))
+                        if (tableNames == null)
                         {
                             // 处理错误情况
-                            database_result_label.Text = "数据库连接失败";
+                            database_result_label.Text = "数据库连接失败" + (string.IsNullOrEmpty(dbError) ? "" : "：" + dbError);
                         }
                         else
                         {
@@ -2799,12 +2865,12 @@ namespace TableMagic
                         string connectionString1 = $"Data Source={dbaddress_textBox.Text};Initial Catalog={dbname_textBox.Text};User ID={dbuser_textBox.Text};Password={dbpwd_textBox.Text}";
 
                         // 连接到数据库并获取表名列表
-                        tableNames = SQLServerDB.GetTableNames(connectionString1);
+                        tableNames = SQLServerDB.GetTableNames(connectionString1, out dbError);
 
-                        if (tableNames.Count == 1 && tableNames[0].Contains(":"))
+                        if (tableNames == null)
                         {
                             // 处理错误情况
-                            database_result_label.Text = "数据库连接失败";
+                            database_result_label.Text = "数据库连接失败" + (string.IsNullOrEmpty(dbError) ? "" : "：" + dbError);
 
                         }
                         else
@@ -2845,11 +2911,11 @@ namespace TableMagic
                         {
                             connectionString2 = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;Jet OLEDB:Database Password={dbpwd_textBox.Text};";
                         }
-                        tableNames = AccessDB.GetTableNames(connectionString2);
-                        if (tableNames.Count == 1 && tableNames[0].Contains(":"))
+                        tableNames = AccessDB.GetTableNames(connectionString2, out dbError);
+                        if (tableNames == null)
                         {
                             // 处理错误情况
-                            database_result_label.Text = "数据库连接失败";
+                            database_result_label.Text = "数据库连接失败" + (string.IsNullOrEmpty(dbError) ? "" : "：" + dbError);
                         }
                         else
                         {
@@ -2889,11 +2955,11 @@ namespace TableMagic
                         {
                             connectionString3 = $"Data Source={dbaddress_textBox.Text};Version=3;Password={dbpwd_textBox.Text};";
                         }
-                        tableNames = SqliteDB.GetTableNames(connectionString3);
-                        if (tableNames.Count == 1 && tableNames[0].Contains(":"))
+                        tableNames = SqliteDB.GetTableNames(connectionString3, out dbError);
+                        if (tableNames == null)
                         {
                             // 处理错误情况
-                            database_result_label.Text = "数据库连接失败";
+                            database_result_label.Text = "数据库连接失败" + (string.IsNullOrEmpty(dbError) ? "" : "：" + dbError);
                         }
                         else
                         {
@@ -2924,14 +2990,14 @@ namespace TableMagic
 
                     //PostgreSQL
                     case 4:
-                        string connectionString4 = $"Host={dbaddress_textBox.Text};Port={dbport_textBox.Text};Username={dbuser_textBox.Text};Password={dbpwd_textBox.Text};Database={dbname_textBox.Text}";
+                        string connectionString4 = BuildPostgreSqlConnectionString();
                         // 连接到数据库并获取表名列表
-                        tableNames = PostgreSqlDB.GetTableNames(connectionString4);
+                        tableNames = PostgreSqlDB.GetTableNames(connectionString4, out dbError);
 
-                        if (tableNames.Count == 1 && tableNames[0].Contains(":"))
+                        if (tableNames == null)
                         {
                             // 处理错误情况
-                            database_result_label.Text = "数据库连接失败";
+                            database_result_label.Text = "数据库连接失败" + (string.IsNullOrEmpty(dbError) ? "" : "：" + dbError);
                         }
                         else
                         {
@@ -2966,12 +3032,12 @@ namespace TableMagic
                         string connectionString5 = $"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={dbaddress_textBox.Text})(PORT={dbport_textBox.Text}))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME={dbname_textBox.Text})));User Id={dbuser_textBox.Text};Password={dbpwd_textBox.Text};";
 
                         // 连接到数据库并获取表名列表
-                        tableNames = OracleDB.GetTableNames(connectionString5);
+                        tableNames = OracleDB.GetTableNames(connectionString5, out dbError);
 
-                        if (tableNames.Count == 1 && tableNames[0].Contains(":"))
+                        if (tableNames == null)
                         {
                             // 处理错误情况
-                            database_result_label.Text = "数据库连接失败";
+                            database_result_label.Text = "数据库连接失败" + (string.IsNullOrEmpty(dbError) ? "" : "：" + dbError);
                         }
                         else
                         {
@@ -3007,10 +3073,10 @@ namespace TableMagic
                     //    // 连接到数据库并获取表名列表
                     //    tableNames = Db2DB.GetTableNames(connectionString6);
 
-                    //    if (tableNames.Count == 1 && tableNames[0].Contains(":"))
+                    //    if (tableNames == null)
                     //    {
                     //        // 处理错误情况
-                    //        database_result_label.Text = "数据库连接失败";
+                    //        database_result_label.Text = "数据库连接失败" + (string.IsNullOrEmpty(dbError) ? "" : "：" + dbError);
                     //    }
                     //    else
                     //    {
@@ -3044,11 +3110,41 @@ namespace TableMagic
             }
         }
 
+        // 使用连接字符串构造器，避免密码/库名中的 ; " ' 等字符破坏连接字符串
+        private string BuildPostgreSqlConnectionString()
+        {
+            var builder = new NpgsqlConnectionStringBuilder
+            {
+                Host = dbaddress_textBox.Text.Trim(),
+                Username = dbuser_textBox.Text,
+                Password = dbpwd_textBox.Text,
+                Database = dbname_textBox.Text.Trim(),
+                Timeout = 15,
+                CommandTimeout = 60
+            };
+
+            int port;
+            if (int.TryParse(dbport_textBox.Text.Trim(), out port) && port > 0 && port <= 65535)
+            {
+                builder.Port = port;
+            }
+
+            return builder.ConnectionString;
+        }
+
         // 更新 DataGridView
         private void UpdateDataGridView(string tableName)
         {
-            var dataTable = GetDataTable(tableName);
-            dbsheet_dataGridView.DataSource = dataTable;
+            try
+            {
+                var dataTable = GetDataTable(tableName);
+                dbsheet_dataGridView.DataSource = dataTable;
+            }
+            catch (Exception ex)
+            {
+                dbsheet_dataGridView.DataSource = null;
+                DbHelper.ReportError("读取数据表（" + tableName + "）", ex);
+            }
         }
 
         // 获取数据库指定数据表
@@ -3143,11 +3239,11 @@ namespace TableMagic
 
                 //PostgreSQL
                 case 4:
-                    connectionString = $"Host={dbaddress_textBox.Text};Port={dbport_textBox.Text};Username={dbuser_textBox.Text};Password={dbpwd_textBox.Text};Database={dbname_textBox.Text}";
+                    connectionString = BuildPostgreSqlConnectionString();
                     using (var connection = new NpgsqlConnection(connectionString))
                     {
                         connection.Open();
-                        using (var command = new NpgsqlCommand($"SELECT * FROM {tableName}", connection))
+                        using (var command = new NpgsqlCommand($"SELECT * FROM {PostgreSqlDB.QuoteTableName(tableName)}", connection))
                         {
                             using (var adapter = new NpgsqlDataAdapter(command))
                             {
@@ -3560,9 +3656,23 @@ namespace TableMagic
                 Excel.Range selection = ThisAddIn.app.Selection as Excel.Range;
                 if (selection != null)
                 {
+                    // 若只选中了一个单元格，则默认使用当前工作表的 UsedRange
+                    Excel.Range target = selection;
+                    if (selection.Cells.Count == 1)
+                    {
+                        Excel.Worksheet activeSheet = ThisAddIn.app.ActiveSheet as Excel.Worksheet;
+                        if (activeSheet != null && activeSheet.UsedRange != null)
+                        {
+                            target = activeSheet.UsedRange;
+                        }
+                    }
+
                     // 获取选区地址（不包含工作表名称）
-                    string rangeAddress = selection.Address[false, false];
+                    string rangeAddress = target.Address[false, false];
                     chart_range_textBox.Text = rangeAddress;
+
+                    // 一维表模式下，用新选区域刷新三个明细选项
+                    EnsureDetailOptions();
                 }
                 else
                 {
@@ -3706,7 +3816,7 @@ namespace TableMagic
                 WordCloud wc = WordCloud.Create(new WordCloudOptions(600, 400, ConvertToWordScores(frequencyDict))
                 {
                     TextOrientation = orientations[textDirection],
-                    FontManager = new FontManager([SKTypeface.FromFamilyName($"fontName")]),
+                    FontManager = new FontManager([SKTypeface.FromFamilyName(fontName)]),
                 });
                 byte[] pngBytes = wc.ToSKBitmap().Encode(SKEncodedImageFormat.Png, 100).AsSpan().ToArray();
 
@@ -3808,14 +3918,203 @@ namespace TableMagic
                     groupBoxWordCloud.Visible = true;
                     chart_pictureBox.Visible = true;
                     groupBoxDanamic.Visible = false;
+                    groupBoxDanamic2.Visible = false;
+                    // 词云图不需要表格类型选择
+                    label32.Visible = false;
+                    sheetType_select_comboBox.Visible = false;
                     break;
                 case 1:
                     chart_range_textBox.Text = "";
                     groupBoxWordCloud.Visible = false;
                     chart_pictureBox.Visible = false;
-                    groupBoxDanamic.Visible = true;
+                    // 动态图需要表格类型选择，默认二维表
+                    label32.Visible = true;
+                    sheetType_select_comboBox.Visible = true;
+                    sheetType_select_comboBox.SelectedIndex = 0;
+                    ApplySheetTypeVisibility();
                     break;
             }
+        }
+
+        /// <summary>根据表格类型（二维表/一维表）互斥显示对应配置容器</summary>
+        private void ApplySheetTypeVisibility()
+        {
+            bool oneDimension = sheetType_select_comboBox.SelectedIndex == 1;
+            groupBoxDanamic.Visible = !oneDimension;
+            groupBoxDanamic2.Visible = oneDimension;
+        }
+
+        /// <summary>切换表格类型时，同步切换配置容器（仅动态图模式下生效）</summary>
+        private void sheetType_select_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (chart_select_comboBox.SelectedIndex == 1)
+            {
+                ApplySheetTypeVisibility();
+                // 切换到一维表时，用当前数据区域初始化三个明细选项
+                if (sheetType_select_comboBox.SelectedIndex == 1)
+                {
+                    EnsureDetailOptions();
+                }
+            }
+        }
+
+        /// <summary>分组方式切换时，重新加载一维表的三个明细选项</summary>
+        private void dpGroupBy2_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (chart_select_comboBox.SelectedIndex == 1 && sheetType_select_comboBox.SelectedIndex == 1)
+            {
+                EnsureDetailOptions();
+            }
+        }
+
+        /// <summary>
+        /// 一维表模式：按分组方式取选中区域的第一行（列标题）或第一列（行标题），
+        /// 动态填充分组/类别/数值三个明细下拉框，并默认选中第一项。
+        /// 仅在“动态图 + 一维表”下生效，不影响二维表逻辑。
+        /// </summary>
+        private void EnsureDetailOptions()
+        {
+            if (chart_select_comboBox.SelectedIndex != 1 || sheetType_select_comboBox.SelectedIndex != 1) return;
+            if (workbook == null || string.IsNullOrWhiteSpace(chart_range_textBox.Text)) return;
+
+            try
+            {
+                Excel.Range range = workbook.ActiveSheet.Range[chart_range_textBox.Text];
+                var values = range.Value2 as object[,];
+                if (values == null) return;
+
+                int rows = range.Rows.Count;
+                int cols = range.Columns.Count;
+                var options = new List<string>();
+
+                if (dpGroupBy2_comboBox.SelectedIndex == 0) // 列标题：取第一行
+                {
+                    for (int c = 1; c <= cols; c++)
+                        options.Add(values[1, c] == null ? "" : values[1, c].ToString().Trim());
+                }
+                else // 行标题：取第一列
+                {
+                    for (int r = 1; r <= rows; r++)
+                        options.Add(values[r, 1] == null ? "" : values[r, 1].ToString().Trim());
+                }
+
+                ComboBox[] boxes = { dpGroupDetails_comboBox, dpItemDetails_comboBox, dpValueDetails_comboBox };
+                foreach (var box in boxes)
+                {
+                    box.Items.Clear();
+                    foreach (var option in options) box.Items.Add(option);
+                    box.SelectedIndex = options.Count > 0 ? 0 : -1;
+                }
+            }
+            catch { /* 读取失败时保持原选项 */ }
+        }
+
+        // ===== 动态图：标题文本框占位符（空时显示“（可不填）”，聚焦时清空） =====
+        private void InitTitlePlaceholders()
+        {
+            TextBox[] boxes = {
+                dpTitle_textBox, dpXTitle_textBox, dpYTitle_textBox,
+                dpTitle2_textBox, dpXTitle2_textBox, dpYTitle2_textBox
+            };
+            foreach (var box in boxes)
+            {
+                box.Enter += TitleTextBox_Enter;
+                box.Leave += TitleTextBox_Leave;
+                ApplyTitlePlaceholder(box, false);
+            }
+        }
+
+        private void TitleTextBox_Enter(object sender, EventArgs e)
+        {
+            ApplyTitlePlaceholder((TextBox)sender, true);
+        }
+
+        private void TitleTextBox_Leave(object sender, EventArgs e)
+        {
+            ApplyTitlePlaceholder((TextBox)sender, false);
+        }
+
+        private void ApplyTitlePlaceholder(TextBox box, bool focusGained)
+        {
+            bool isPlaceholder = box.Tag as string == "placeholder";
+            if (focusGained)
+            {
+                if (isPlaceholder)
+                {
+                    box.Tag = null;
+                    box.Text = "";
+                    box.ForeColor = SystemColors.WindowText;
+                }
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(box.Text))
+                {
+                    box.Tag = "placeholder";
+                    box.Text = TitlePlaceholderText;
+                    box.ForeColor = Color.LightGray;
+                }
+                else
+                {
+                    box.Tag = null;
+                    box.ForeColor = SystemColors.WindowText;
+                }
+            }
+        }
+
+        /// <summary>读取标题文本框的实际值（占位符视为未填写）</summary>
+        private string GetTitleValue(TextBox box)
+        {
+            return box.Tag as string == "placeholder" ? "" : box.Text.Trim();
+        }
+
+        /// <summary>
+        /// 一维表转二维表：按用户选择的分组/类别/数值列（相对选区的 1-based 索引）
+        /// 组织成 DynamicPic 需要的数据字典（分组名 → 类别名 → 数值）。
+        /// </summary>
+        private Dictionary<string, Dictionary<string, decimal>> BuildGroupedDataBySelection(
+            Excel.Range dataRange, DataOrientation orientation,
+            int groupIndex, int itemIndex, int valueIndex, bool skipHeader)
+        {
+            var result = new Dictionary<string, Dictionary<string, decimal>>();
+            var values = dataRange.Value2 as object[,];
+            if (values == null) return result;
+
+            int rows = dataRange.Rows.Count;
+            int cols = dataRange.Columns.Count;
+            int start = skipHeader ? 2 : 1;
+
+            if (orientation == DataOrientation.ByColumn)
+            {
+                // 每行一条记录：group/item/value 分别取自指定的三列
+                for (int r = start; r <= rows; r++)
+                {
+                    AddGroupedRecord(result, values[r, groupIndex], values[r, itemIndex], values[r, valueIndex]);
+                }
+            }
+            else
+            {
+                // 转置一维表：每列一条记录：group/item/value 分别取自指定的三行
+                for (int c = start; c <= cols; c++)
+                {
+                    AddGroupedRecord(result, values[groupIndex, c], values[itemIndex, c], values[valueIndex, c]);
+                }
+            }
+            return result;
+        }
+
+        private void AddGroupedRecord(Dictionary<string, Dictionary<string, decimal>> result,
+            object groupObj, object itemObj, object valueObj)
+        {
+            string group = groupObj == null ? "" : groupObj.ToString().Trim();
+            string item = itemObj == null ? "" : itemObj.ToString().Trim();
+            if (string.IsNullOrWhiteSpace(group) || string.IsNullOrWhiteSpace(item)) return;
+
+            decimal val;
+            if (valueObj == null || !decimal.TryParse(valueObj.ToString(), out val)) return;
+
+            if (!result.ContainsKey(group)) result[group] = new Dictionary<string, decimal>();
+            result[group][item] = val; // 同一分组同一类别重复出现时取最后一条
         }
 
         /// <summary>
@@ -3830,25 +4129,47 @@ namespace TableMagic
                 return;
             }
 
+            // 表格类型：0=二维表（默认），1=一维表
+            bool oneDimension = sheetType_select_comboBox.SelectedIndex == 1;
+
+            // 根据表格类型选取对应的配置控件组
+            ComboBox typeBox = oneDimension ? dpType2_comboBox : dpType_comboBox;
+            ComboBox formatBox = oneDimension ? dpFormat2_comboBox : dpFormat_comboBox;
+            ComboBox groupByBox = oneDimension ? dpGroupBy2_comboBox : dpGroupBy_comboBox;
+            ComboBox sortBox = oneDimension ? dpSortType2_comboBox : dpSortType_comboBox;
+            TextBox titleBox = oneDimension ? dpTitle2_textBox : dpTitle_textBox;
+            TextBox xBox = oneDimension ? dpXTitle2_textBox : dpXTitle_textBox;
+            TextBox yBox = oneDimension ? dpYTitle2_textBox : dpYTitle_textBox;
+
             // 验证ComboBox选择
-            if (dpType_comboBox.SelectedIndex < 0)
+            if (typeBox.SelectedIndex < 0)
             {
                 MessageBox.Show("请选择动图类型");
                 return;
             }
-            if (dpFormat_comboBox.SelectedIndex < 0)
+            if (formatBox.SelectedIndex < 0)
             {
                 MessageBox.Show("请选择动图格式");
                 return;
             }
-            if (dpGroupBy_comboBox.SelectedIndex < 0)
+            if (groupByBox.SelectedIndex < 0)
             {
                 MessageBox.Show("请选择分组方式");
                 return;
             }
-            if (dpSortType_comboBox.SelectedIndex < 0)
+            if (sortBox.SelectedIndex < 0)
             {
                 MessageBox.Show("请选择排列顺序");
+                return;
+            }
+
+            // 一维表还需验证分组/类别/数值选项
+            if (oneDimension &&
+                (dpGroupDetails_comboBox.SelectedIndex < 0 ||
+                 dpItemDetails_comboBox.SelectedIndex < 0 ||
+                 dpValueDetails_comboBox.SelectedIndex < 0))
+            {
+                MessageBox.Show("一维表模式下请选择分组选项、类别选项和数值选项");
                 return;
             }
 
@@ -3857,13 +4178,12 @@ namespace TableMagic
                 // 获取选中的数据范围
                 Excel.Range dataRange = workbook.ActiveSheet.Range[chart_range_textBox.Text];
 
-                // 获取配置参数
                 // 图表类型：条形图(HorizontalBar) / 柱状图(VerticalBar)
-                ChartType chartType = dpType_comboBox.SelectedIndex == 0 ? ChartType.HorizontalBar : ChartType.VerticalBar;
+                ChartType chartType = typeBox.SelectedIndex == 0 ? ChartType.HorizontalBar : ChartType.VerticalBar;
 
                 // 输出格式：HTML格式 / GIF格式 / 两者都有
                 OutputFormat outputFormat;
-                switch (dpFormat_comboBox.SelectedIndex)
+                switch (formatBox.SelectedIndex)
                 {
                     case 0:
                         outputFormat = OutputFormat.Html;
@@ -3877,15 +4197,15 @@ namespace TableMagic
                 }
 
                 // 分组方式：列标题(ByColumn) / 行标题(ByRow)
-                DataOrientation dataOrientation = dpGroupBy_comboBox.SelectedIndex == 0 ? DataOrientation.ByColumn : DataOrientation.ByRow;
+                DataOrientation dataOrientation = groupByBox.SelectedIndex == 0 ? DataOrientation.ByColumn : DataOrientation.ByRow;
 
                 // 排列顺序：降序 / 升序
-                DynamicPic.Core.SortOrder sortOrder = dpSortType_comboBox.SelectedIndex == 0 ? DynamicPic.Core.SortOrder.Descending : DynamicPic.Core.SortOrder.Ascending;
+                DynamicPic.Core.SortOrder sortOrder = sortBox.SelectedIndex == 0 ? DynamicPic.Core.SortOrder.Descending : DynamicPic.Core.SortOrder.Ascending;
 
-                // 获取标题
-                string chartTitle = dpTitle_textBox.Text;
-                string xAxisTitle = dpXTitle_textBox.Text;
-                string yAxisTitle = dpYTitle_textBox.Text;
+                // 获取标题（占位符视为未填写）
+                string chartTitle = GetTitleValue(titleBox);
+                string xAxisTitle = GetTitleValue(xBox);
+                string yAxisTitle = GetTitleValue(yBox);
 
                 // 配置图表标题模板
                 // 如果用户输入了标题，则使用"标题 - 分组名"格式；否则只显示分组名
@@ -3918,12 +4238,25 @@ namespace TableMagic
                     DataOrientation = dataOrientation
                 };
 
-                // 从选定区域读取数据
-                var data = ExcelReader.ReadValueDataFromRange(dataRange, dataOrientation);
+                Dictionary<string, Dictionary<string, decimal>> data;
+                if (oneDimension)
+                {
+                    // 一维表：先按用户选择的分组/类别/数值选项做一维转二维
+                    data = BuildGroupedDataBySelection(dataRange, dataOrientation,
+                        dpGroupDetails_comboBox.SelectedIndex + 1,
+                        dpItemDetails_comboBox.SelectedIndex + 1,
+                        dpValueDetails_comboBox.SelectedIndex + 1,
+                        skipHeader_checkBox.Checked);
+                }
+                else
+                {
+                    // 二维表：直接交给 DynamicPic 按第一行/第一列解析（原逻辑不变）
+                    data = ExcelReader.ReadValueDataFromRange(dataRange, dataOrientation);
+                }
 
                 if (data == null || data.Count == 0)
                 {
-                    MessageBox.Show("未能从选定区域读取到有效数据，请确保数据格式正确。\n第一行/第一列应为标题。");
+                    MessageBox.Show("未能从选定区域读取到有效数据，请确保数据格式正确。\n二维表：第一行/第一列应为标题；一维表：请检查分组/类别/数值选项。");
                     return;
                 }
 
@@ -3983,7 +4316,8 @@ namespace TableMagic
                             outputPath = gifPath;
                     }
 
-                    MessageBox.Show($"动态图表生成成功！\n保存位置：{excelDir}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    string savedPath = string.IsNullOrEmpty(outputPath) ? excelDir : outputPath;
+                    MessageBox.Show($"动态图表生成成功！\n保存位置：{savedPath}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     // 打开输出文件所在目录
                     Process.Start("explorer.exe", $"/select,\"{outputPath}\"");
@@ -5005,12 +5339,22 @@ namespace TableMagic
 
         private void groupBoxDanamic_VisibleChanged(object sender, EventArgs e)
         {
-            if (groupBoxDanamic.Visible)
+            var box = sender as GroupBox;
+            if (box == null || !box.Visible) return;
+
+            if (box == groupBoxDanamic)
             {
                 dpType_comboBox.SelectedIndex = 0;                 //图表类型默认选项
                 dpGroupBy_comboBox.SelectedIndex = 0;              //分组依据默认选项
                 dpFormat_comboBox.SelectedIndex = 0;               //数值格式默认选项
                 dpSortType_comboBox.SelectedIndex = 0;             //排序方式默认选项
+            }
+            else if (box == groupBoxDanamic2)
+            {
+                dpType2_comboBox.SelectedIndex = 0;                //图表类型默认选项
+                dpGroupBy2_comboBox.SelectedIndex = 0;             //分组依据默认选项
+                dpFormat2_comboBox.SelectedIndex = 0;              //数值格式默认选项
+                dpSortType2_comboBox.SelectedIndex = 0;            //排序方式默认选项
             }
         }
     }
@@ -5018,20 +5362,60 @@ namespace TableMagic
 
 
     /// <summary>
-    /// 以下为数据库操作类，提供获取数据库表名的功能
+    /// 以下为数据库操作类，提供获取数据库表名、统一记录并提示数据库异常的功能
     /// </summary>
+    internal static class DbHelper
+    {
+        private static readonly object _logLock = new object();
+
+        // 记录数据库异常到 %LOCALAPPDATA%\TableMagic\logs\database.log，便于安装环境排查问题
+        internal static void LogError(string context, Exception ex)
+        {
+            try
+            {
+                string logDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "TableMagic", "logs");
+                Directory.CreateDirectory(logDir);
+
+                string content = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {context}{Environment.NewLine}{ex}{Environment.NewLine}{Environment.NewLine}";
+                lock (_logLock)
+                {
+                    File.AppendAllText(Path.Combine(logDir, "database.log"), content, Encoding.UTF8);
+                }
+            }
+            catch
+            {
+                // 日志写入失败不能影响主流程
+            }
+        }
+
+        internal static void ReportError(string context, Exception ex)
+        {
+            LogError(context, ex);
+            try
+            {
+                MessageBox.Show($"数据库操作失败（{context}）：{ex.Message}", "数据库错误",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch
+            {
+            }
+        }
+    }
+
     internal class MysqlDB
     {
-        internal static List<string> GetTableNames(string connString)
+        internal static List<string> GetTableNames(string connString, out string error)
         {
-            using (var connection = new MySqlConnection(connString))
+            error = null;
+            try
             {
-                try
+                using (var connection = new MySqlConnection(connString))
                 {
                     connection.Open();
                     using (var command = new MySqlCommand("SHOW TABLES", connection))             //"SHOW TABLES"
                     {
-
                         using (var reader = command.ExecuteReader())
                         {
                             List<string> tableNames = new List<string>();
@@ -5043,22 +5427,24 @@ namespace TableMagic
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("数据库连接失败：" + ex.Message);
-                    return new List<string>() { ex.Message + ":" };
-                }
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                DbHelper.ReportError("MySQL", ex);
+                return null;
             }
         }
     }
 
     internal class SQLServerDB
     {
-        internal static List<string> GetTableNames(string connString)
+        internal static List<string> GetTableNames(string connString, out string error)
         {
-            using (SqlConnection connection = new SqlConnection(connString))
+            error = null;
+            try
             {
-                try
+                using (SqlConnection connection = new SqlConnection(connString))
                 {
                     connection.Open();
 
@@ -5084,22 +5470,24 @@ namespace TableMagic
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("数据库连接失败：" + ex.Message);
-                    return new List<string>() { ex.Message + ":" };
-                }
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                DbHelper.ReportError("SQL Server", ex);
+                return null;
             }
         }
     }
 
     internal class AccessDB
     {
-        internal static List<string> GetTableNames(string connString)
+        internal static List<string> GetTableNames(string connString, out string error)
         {
-            using (var connection = new OleDbConnection(connString))
+            error = null;
+            try
             {
-                try
+                using (var connection = new OleDbConnection(connString))
                 {
                     connection.Open();
 
@@ -5117,25 +5505,27 @@ namespace TableMagic
                     }
                     else
                     {
-                        return new List<string>() { "没有找到任何表" };
+                        return new List<string>();
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("数据库连接失败：" + ex.Message);
-                    return new List<string>() { ex.Message + ":" };
-                }
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                DbHelper.ReportError("Access", ex);
+                return null;
             }
         }
     }
 
     internal class SqliteDB
     {
-        internal static List<string> GetTableNames(string connString)
+        internal static List<string> GetTableNames(string connString, out string error)
         {
-            using (var connection = new SQLiteConnection(connString))
+            error = null;
+            try
             {
-                try
+                using (var connection = new SQLiteConnection(connString))
                 {
                     connection.Open();
 
@@ -5162,53 +5552,79 @@ namespace TableMagic
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("数据库连接失败：" + ex.Message);
-                    return new List<string>() { ex.Message };
-                }
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                DbHelper.ReportError("SQLite", ex);
+                return null;
             }
         }
     }
 
     internal class PostgreSqlDB
     {
-        internal static List<string> GetTableNames(string connString)
+        internal static List<string> GetTableNames(string connString, out string error)
         {
-            using (var connection = new NpgsqlConnection(connString))
+            error = null;
+            try
             {
-                try
+                using (var connection = new NpgsqlConnection(connString))
                 {
                     connection.Open();
-                    using (var command = new NpgsqlCommand("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'", connection))
+
+                    // 排除系统 schema，public 以外的 schema 也能找到；显示时带上 schema 前缀
+                    const string query = @"
+                        SELECT table_schema, table_name
+                        FROM information_schema.tables
+                        WHERE table_type IN ('BASE TABLE', 'VIEW')
+                          AND table_schema NOT IN ('pg_catalog', 'information_schema')
+                        ORDER BY table_schema, table_name";
+
+                    using (var command = new NpgsqlCommand(query, connection))
                     {
                         using (var reader = command.ExecuteReader())
                         {
                             List<string> tableNames = new List<string>();
                             while (reader.Read())
                             {
-                                tableNames.Add(reader.GetString(0));
+                                string schema = reader.GetString(0);
+                                string table = reader.GetString(1);
+                                tableNames.Add(schema == "public" ? table : schema + "." + table);
                             }
                             return tableNames;
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("数据库连接失败：" + ex.Message);
-                    return new List<string>() { ex.Message };
-                }
             }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                DbHelper.ReportError("PostgreSQL", ex);
+                return null;
+            }
+        }
+
+        // PostgreSQL 标识符需要用双引号包裹，兼容大写、含空格/中文的表名以及 schema.table 形式
+        internal static string QuoteTableName(string tableName)
+        {
+            string[] parts = tableName.Split('.');
+            for (int i = 0; i < parts.Length; i++)
+            {
+                parts[i] = "\"" + parts[i].Replace("\"", "\"\"") + "\"";
+            }
+            return string.Join(".", parts);
         }
     }
 
     internal class OracleDB
     {
-        internal static List<string> GetTableNames(string connString)
+        internal static List<string> GetTableNames(string connString, out string error)
         {
-            using (OracleConnection connection = new OracleConnection(connString))
+            error = null;
+            try
             {
-                try
+                using (OracleConnection connection = new OracleConnection(connString))
                 {
                     connection.Open();
                     // 获取当前用户下的所有表名
@@ -5225,11 +5641,12 @@ namespace TableMagic
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("数据库连接失败：" + ex.Message);
-                    return new List<string>() { ex.Message + ":" };
-                }
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                DbHelper.ReportError("Oracle", ex);
+                return null;
             }
         }
     }

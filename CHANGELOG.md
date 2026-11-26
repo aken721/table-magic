@@ -5,6 +5,28 @@ All notable changes are documented here, following the [Keep a Changelog](https:
 
 ---
 
+## [v2.5.2.1] - 2026-11-27
+
+### ✨ 新增 | Added
+- **动态图支持一维表**：图表增强新增"表格类型"选择（二维表/一维表）
+  - 二维表：沿用原有"列标题/行标题"分组方式，直接生成动态图
+  - 一维表：自动从选区首行/首列加载"分组/类别/数值"选项，将一维明细表转换为二维数据后再生成动态图，支持跳过标题行
+- **标题文本框占位符**：图表标题、X/Y 轴标题输入框为空时显示浅灰色"（可不填）"，聚焦时自动清空
+- **Dependency 更新**：DynamicPic.Core 升级到 1.0.3（Magick.NET 15.1.0 修复安全漏洞），并解耦 Excel 互操作 PIA 版本（改用 late-bound COM 调用，兼容 Office 2013 及以下版本）
+
+### 🔧 优化 | Changed
+- **获取选区按钮**：当选区仅为单个单元格时，自动改用当前工作表的 UsedRange 作为数据范围
+- **打包优化**：安装包改用 bin\Release 构建，移除 CASPOL 自定义动作和 macOS 动态库，新增 .NET Framework 4.8 与 VSTO 4.0 Runtime 先决条件，关闭无效的 Authenticode 签名
+- **图表增强性能**：注释掉未启用的系统字体枚举代码，消除切换标签时的界面卡顿（保留代码，取消注释即可恢复字体选择功能）
+- 所有数据库操作统一错误提示与日志记录（`%LOCALAPPDATA%\TableMagic\logs\database.log`）
+
+### 🐛 修复 | Fixed
+- **修复 PostgreSQL 连接失败无提示**：统一异常上报并显示真实错误原因，支持非 public schema 与引号标识符，正确构建连接字符串
+- **修复数据库选项卡切换闪退**：ComboBox 在 DataSource 绑定状态下调用 `Items.Clear()` 抛出异常导致 Excel 退出；先解绑再清空，并为 async void 事件处理器和全局线程异常添加兜底，避免拖垮 Excel
+- 修复定时器事件重复订阅导致的性能与崩溃隐患
+
+---
+
 ## [v2.5.2.0] - 2026-11-03
 
 ### ✨ 新增 | Added

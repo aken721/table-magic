@@ -158,22 +158,43 @@ namespace TableMagic
             this.label17 = new System.Windows.Forms.Label();
             this.address_textBox = new System.Windows.Forms.TextBox();
             this.tabPage7 = new System.Windows.Forms.TabPage();
-            this.groupBoxDanamic = new System.Windows.Forms.GroupBox();
-            this.label34 = new System.Windows.Forms.Label();
-            this.label33 = new System.Windows.Forms.Label();
+            this.sheetType_select_comboBox = new System.Windows.Forms.ComboBox();
             this.label32 = new System.Windows.Forms.Label();
+            this.groupBoxDanamic2 = new System.Windows.Forms.GroupBox();
+            this.groupBoxDanamic = new System.Windows.Forms.GroupBox();
             this.dpSortType_comboBox = new System.Windows.Forms.ComboBox();
-            this.label31 = new System.Windows.Forms.Label();
+            this.label39 = new System.Windows.Forms.Label();
             this.dpYTitle_textBox = new System.Windows.Forms.TextBox();
             this.dpXTitle_textBox = new System.Windows.Forms.TextBox();
             this.dpTitle_textBox = new System.Windows.Forms.TextBox();
-            this.label30 = new System.Windows.Forms.Label();
-            this.label29 = new System.Windows.Forms.Label();
+            this.label40 = new System.Windows.Forms.Label();
+            this.label41 = new System.Windows.Forms.Label();
             this.dpGroupBy_comboBox = new System.Windows.Forms.ComboBox();
-            this.label28 = new System.Windows.Forms.Label();
-            this.label27 = new System.Windows.Forms.Label();
+            this.label42 = new System.Windows.Forms.Label();
+            this.label43 = new System.Windows.Forms.Label();
             this.dpFormat_comboBox = new System.Windows.Forms.ComboBox();
             this.dpType_comboBox = new System.Windows.Forms.ComboBox();
+            this.label44 = new System.Windows.Forms.Label();
+            this.label45 = new System.Windows.Forms.Label();
+            this.skipHeader_checkBox = new System.Windows.Forms.CheckBox();
+            this.dpValueDetails_comboBox = new System.Windows.Forms.ComboBox();
+            this.label36 = new System.Windows.Forms.Label();
+            this.dpItemDetails_comboBox = new System.Windows.Forms.ComboBox();
+            this.label37 = new System.Windows.Forms.Label();
+            this.dpGroupDetails_comboBox = new System.Windows.Forms.ComboBox();
+            this.label35 = new System.Windows.Forms.Label();
+            this.dpSortType2_comboBox = new System.Windows.Forms.ComboBox();
+            this.label31 = new System.Windows.Forms.Label();
+            this.dpYTitle2_textBox = new System.Windows.Forms.TextBox();
+            this.dpXTitle2_textBox = new System.Windows.Forms.TextBox();
+            this.dpTitle2_textBox = new System.Windows.Forms.TextBox();
+            this.label30 = new System.Windows.Forms.Label();
+            this.label29 = new System.Windows.Forms.Label();
+            this.dpGroupBy2_comboBox = new System.Windows.Forms.ComboBox();
+            this.label28 = new System.Windows.Forms.Label();
+            this.label27 = new System.Windows.Forms.Label();
+            this.dpFormat2_comboBox = new System.Windows.Forms.ComboBox();
+            this.dpType2_comboBox = new System.Windows.Forms.ComboBox();
             this.label26 = new System.Windows.Forms.Label();
             this.label25 = new System.Windows.Forms.Label();
             this.groupBoxWordCloud = new System.Windows.Forms.GroupBox();
@@ -225,6 +246,7 @@ namespace TableMagic
             this.user_flowLayoutPanel.SuspendLayout();
             this.pwd_flowLayoutPanel.SuspendLayout();
             this.tabPage7.SuspendLayout();
+            this.groupBoxDanamic2.SuspendLayout();
             this.groupBoxDanamic.SuspendLayout();
             this.groupBoxWordCloud.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart_pictureBox)).BeginInit();
@@ -1822,6 +1844,9 @@ namespace TableMagic
             // 
             // tabPage7
             // 
+            this.tabPage7.Controls.Add(this.sheetType_select_comboBox);
+            this.tabPage7.Controls.Add(this.label32);
+            this.tabPage7.Controls.Add(this.groupBoxDanamic2);
             this.tabPage7.Controls.Add(this.groupBoxDanamic);
             this.tabPage7.Controls.Add(this.groupBoxWordCloud);
             this.tabPage7.Controls.Add(this.chart_pictureBox);
@@ -1843,63 +1868,84 @@ namespace TableMagic
             this.tabPage7.Text = "七、图表增强";
             this.tabPage7.UseVisualStyleBackColor = true;
             // 
-            // groupBoxDanamic
+            // sheetType_select_comboBox
             // 
-            this.groupBoxDanamic.Controls.Add(this.label34);
-            this.groupBoxDanamic.Controls.Add(this.label33);
-            this.groupBoxDanamic.Controls.Add(this.label32);
-            this.groupBoxDanamic.Controls.Add(this.dpSortType_comboBox);
-            this.groupBoxDanamic.Controls.Add(this.label31);
-            this.groupBoxDanamic.Controls.Add(this.dpYTitle_textBox);
-            this.groupBoxDanamic.Controls.Add(this.dpXTitle_textBox);
-            this.groupBoxDanamic.Controls.Add(this.dpTitle_textBox);
-            this.groupBoxDanamic.Controls.Add(this.label30);
-            this.groupBoxDanamic.Controls.Add(this.label29);
-            this.groupBoxDanamic.Controls.Add(this.dpGroupBy_comboBox);
-            this.groupBoxDanamic.Controls.Add(this.label28);
-            this.groupBoxDanamic.Controls.Add(this.label27);
-            this.groupBoxDanamic.Controls.Add(this.dpFormat_comboBox);
-            this.groupBoxDanamic.Controls.Add(this.dpType_comboBox);
-            this.groupBoxDanamic.Controls.Add(this.label26);
-            this.groupBoxDanamic.Controls.Add(this.label25);
-            this.groupBoxDanamic.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.groupBoxDanamic.Location = new System.Drawing.Point(345, 51);
-            this.groupBoxDanamic.Name = "groupBoxDanamic";
-            this.groupBoxDanamic.Size = new System.Drawing.Size(328, 330);
-            this.groupBoxDanamic.TabIndex = 12;
-            this.groupBoxDanamic.TabStop = false;
-            this.groupBoxDanamic.Text = "动态图配置";
-            this.groupBoxDanamic.VisibleChanged += new System.EventHandler(this.groupBoxDanamic_VisibleChanged);
-            // 
-            // label34
-            // 
-            this.label34.AutoSize = true;
-            this.label34.ForeColor = System.Drawing.Color.DarkGray;
-            this.label34.Location = new System.Drawing.Point(203, 260);
-            this.label34.Name = "label34";
-            this.label34.Size = new System.Drawing.Size(68, 17);
-            this.label34.TabIndex = 16;
-            this.label34.Text = "（可不填）";
-            // 
-            // label33
-            // 
-            this.label33.AutoSize = true;
-            this.label33.ForeColor = System.Drawing.Color.DarkGray;
-            this.label33.Location = new System.Drawing.Point(203, 223);
-            this.label33.Name = "label33";
-            this.label33.Size = new System.Drawing.Size(68, 17);
-            this.label33.TabIndex = 15;
-            this.label33.Text = "（可不填）";
+            this.sheetType_select_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.sheetType_select_comboBox.FormattingEnabled = true;
+            this.sheetType_select_comboBox.Items.AddRange(new object[] {
+            "二维表",
+            "一维表"});
+            this.sheetType_select_comboBox.Location = new System.Drawing.Point(115, 163);
+            this.sheetType_select_comboBox.Name = "sheetType_select_comboBox";
+            this.sheetType_select_comboBox.Size = new System.Drawing.Size(183, 28);
+            this.sheetType_select_comboBox.TabIndex = 16;
             // 
             // label32
             // 
             this.label32.AutoSize = true;
-            this.label32.ForeColor = System.Drawing.Color.DarkGray;
-            this.label32.Location = new System.Drawing.Point(203, 184);
+            this.label32.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label32.Location = new System.Drawing.Point(44, 166);
             this.label32.Name = "label32";
-            this.label32.Size = new System.Drawing.Size(68, 17);
-            this.label32.TabIndex = 14;
-            this.label32.Text = "（可不填）";
+            this.label32.Size = new System.Drawing.Size(65, 20);
+            this.label32.TabIndex = 15;
+            this.label32.Text = "表格类型";
+            // 
+            // groupBoxDanamic2
+            // 
+            this.groupBoxDanamic2.Controls.Add(this.skipHeader_checkBox);
+            this.groupBoxDanamic2.Controls.Add(this.dpValueDetails_comboBox);
+            this.groupBoxDanamic2.Controls.Add(this.label36);
+            this.groupBoxDanamic2.Controls.Add(this.dpItemDetails_comboBox);
+            this.groupBoxDanamic2.Controls.Add(this.label37);
+            this.groupBoxDanamic2.Controls.Add(this.dpGroupDetails_comboBox);
+            this.groupBoxDanamic2.Controls.Add(this.label35);
+            this.groupBoxDanamic2.Controls.Add(this.dpSortType2_comboBox);
+            this.groupBoxDanamic2.Controls.Add(this.label31);
+            this.groupBoxDanamic2.Controls.Add(this.dpYTitle2_textBox);
+            this.groupBoxDanamic2.Controls.Add(this.dpXTitle2_textBox);
+            this.groupBoxDanamic2.Controls.Add(this.dpTitle2_textBox);
+            this.groupBoxDanamic2.Controls.Add(this.label30);
+            this.groupBoxDanamic2.Controls.Add(this.label29);
+            this.groupBoxDanamic2.Controls.Add(this.dpGroupBy2_comboBox);
+            this.groupBoxDanamic2.Controls.Add(this.label28);
+            this.groupBoxDanamic2.Controls.Add(this.label27);
+            this.groupBoxDanamic2.Controls.Add(this.dpFormat2_comboBox);
+            this.groupBoxDanamic2.Controls.Add(this.dpType2_comboBox);
+            this.groupBoxDanamic2.Controls.Add(this.label26);
+            this.groupBoxDanamic2.Controls.Add(this.label25);
+            this.groupBoxDanamic2.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.groupBoxDanamic2.Location = new System.Drawing.Point(345, 51);
+            this.groupBoxDanamic2.Name = "groupBoxDanamic2";
+            this.groupBoxDanamic2.Size = new System.Drawing.Size(328, 330);
+            this.groupBoxDanamic2.TabIndex = 12;
+            this.groupBoxDanamic2.TabStop = false;
+            this.groupBoxDanamic2.Text = "动态图配置";
+            this.groupBoxDanamic2.VisibleChanged += new System.EventHandler(this.groupBoxDanamic_VisibleChanged);
+            // 
+            // groupBoxDanamic
+            // 
+            this.groupBoxDanamic.VisibleChanged += new System.EventHandler(this.groupBoxDanamic_VisibleChanged);
+            this.groupBoxDanamic.Controls.Add(this.dpSortType_comboBox);
+            this.groupBoxDanamic.Controls.Add(this.label39);
+            this.groupBoxDanamic.Controls.Add(this.dpYTitle_textBox);
+            this.groupBoxDanamic.Controls.Add(this.dpXTitle_textBox);
+            this.groupBoxDanamic.Controls.Add(this.dpTitle_textBox);
+            this.groupBoxDanamic.Controls.Add(this.label40);
+            this.groupBoxDanamic.Controls.Add(this.label41);
+            this.groupBoxDanamic.Controls.Add(this.dpGroupBy_comboBox);
+            this.groupBoxDanamic.Controls.Add(this.label42);
+            this.groupBoxDanamic.Controls.Add(this.label43);
+            this.groupBoxDanamic.Controls.Add(this.dpFormat_comboBox);
+            this.groupBoxDanamic.Controls.Add(this.dpType_comboBox);
+            this.groupBoxDanamic.Controls.Add(this.label44);
+            this.groupBoxDanamic.Controls.Add(this.label45);
+            this.groupBoxDanamic.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.groupBoxDanamic.Location = new System.Drawing.Point(345, 51);
+            this.groupBoxDanamic.Name = "groupBoxDanamic";
+            this.groupBoxDanamic.Size = new System.Drawing.Size(328, 330);
+            this.groupBoxDanamic.TabIndex = 24;
+            this.groupBoxDanamic.TabStop = false;
+            this.groupBoxDanamic.Text = "动态图配置";
             // 
             // dpSortType_comboBox
             // 
@@ -1907,58 +1953,59 @@ namespace TableMagic
             this.dpSortType_comboBox.Items.AddRange(new object[] {
             "降序",
             "升序"});
-            this.dpSortType_comboBox.Location = new System.Drawing.Point(76, 140);
+            this.dpSortType_comboBox.Location = new System.Drawing.Point(75, 148);
             this.dpSortType_comboBox.Name = "dpSortType_comboBox";
-            this.dpSortType_comboBox.Size = new System.Drawing.Size(121, 25);
+            this.dpSortType_comboBox.Size = new System.Drawing.Size(178, 25);
             this.dpSortType_comboBox.TabIndex = 13;
             // 
-            // label31
+            // label39
             // 
-            this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(15, 143);
-            this.label31.Name = "label31";
-            this.label31.Size = new System.Drawing.Size(56, 17);
-            this.label31.TabIndex = 12;
-            this.label31.Text = "排列顺序";
+            this.label39.AutoSize = true;
+            this.label39.Location = new System.Drawing.Point(14, 151);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(56, 17);
+            this.label39.TabIndex = 12;
+            this.label39.Text = "排列顺序";
             // 
             // dpYTitle_textBox
             // 
-            this.dpYTitle_textBox.Location = new System.Drawing.Point(76, 260);
+            this.dpYTitle_textBox.Location = new System.Drawing.Point(75, 261);
             this.dpYTitle_textBox.Name = "dpYTitle_textBox";
-            this.dpYTitle_textBox.Size = new System.Drawing.Size(121, 23);
+            this.dpYTitle_textBox.Size = new System.Drawing.Size(178, 23);
             this.dpYTitle_textBox.TabIndex = 11;
             // 
             // dpXTitle_textBox
             // 
-            this.dpXTitle_textBox.Location = new System.Drawing.Point(76, 220);
+            this.dpXTitle_textBox.Location = new System.Drawing.Point(76, 225);
             this.dpXTitle_textBox.Name = "dpXTitle_textBox";
-            this.dpXTitle_textBox.Size = new System.Drawing.Size(121, 23);
+            this.dpXTitle_textBox.Size = new System.Drawing.Size(177, 23);
             this.dpXTitle_textBox.TabIndex = 10;
             // 
             // dpTitle_textBox
             // 
-            this.dpTitle_textBox.Location = new System.Drawing.Point(76, 182);
+            this.dpTitle_textBox.ForeColor = System.Drawing.Color.LightGray;
+            this.dpTitle_textBox.Location = new System.Drawing.Point(76, 187);
             this.dpTitle_textBox.Name = "dpTitle_textBox";
-            this.dpTitle_textBox.Size = new System.Drawing.Size(121, 23);
+            this.dpTitle_textBox.Size = new System.Drawing.Size(177, 23);
             this.dpTitle_textBox.TabIndex = 9;
             // 
-            // label30
+            // label40
             // 
-            this.label30.AutoSize = true;
-            this.label30.Location = new System.Drawing.Point(15, 262);
-            this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(51, 17);
-            this.label30.TabIndex = 8;
-            this.label30.Text = "Y轴标题";
+            this.label40.AutoSize = true;
+            this.label40.Location = new System.Drawing.Point(14, 263);
+            this.label40.Name = "label40";
+            this.label40.Size = new System.Drawing.Size(51, 17);
+            this.label40.TabIndex = 8;
+            this.label40.Text = "Y轴标题";
             // 
-            // label29
+            // label41
             // 
-            this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(15, 222);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(52, 17);
-            this.label29.TabIndex = 7;
-            this.label29.Text = "X轴标题";
+            this.label41.AutoSize = true;
+            this.label41.Location = new System.Drawing.Point(15, 227);
+            this.label41.Name = "label41";
+            this.label41.Size = new System.Drawing.Size(52, 17);
+            this.label41.TabIndex = 7;
+            this.label41.Text = "X轴标题";
             // 
             // dpGroupBy_comboBox
             // 
@@ -1966,28 +2013,28 @@ namespace TableMagic
             this.dpGroupBy_comboBox.Items.AddRange(new object[] {
             "列标题",
             "行标题"});
-            this.dpGroupBy_comboBox.Location = new System.Drawing.Point(76, 102);
+            this.dpGroupBy_comboBox.Location = new System.Drawing.Point(76, 105);
             this.dpGroupBy_comboBox.Name = "dpGroupBy_comboBox";
-            this.dpGroupBy_comboBox.Size = new System.Drawing.Size(121, 25);
+            this.dpGroupBy_comboBox.Size = new System.Drawing.Size(177, 25);
             this.dpGroupBy_comboBox.TabIndex = 6;
             // 
-            // label28
+            // label42
             // 
-            this.label28.AutoSize = true;
-            this.label28.Location = new System.Drawing.Point(15, 184);
-            this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(56, 17);
-            this.label28.TabIndex = 5;
-            this.label28.Text = "图表标题";
+            this.label42.AutoSize = true;
+            this.label42.Location = new System.Drawing.Point(15, 189);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(56, 17);
+            this.label42.TabIndex = 5;
+            this.label42.Text = "图表标题";
             // 
-            // label27
+            // label43
             // 
-            this.label27.AutoSize = true;
-            this.label27.Location = new System.Drawing.Point(15, 102);
-            this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(56, 17);
-            this.label27.TabIndex = 4;
-            this.label27.Text = "分组方式";
+            this.label43.AutoSize = true;
+            this.label43.Location = new System.Drawing.Point(15, 105);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(56, 17);
+            this.label43.TabIndex = 4;
+            this.label43.Text = "分组方式";
             // 
             // dpFormat_comboBox
             // 
@@ -1996,9 +2043,9 @@ namespace TableMagic
             "HTML格式",
             "GIF格式",
             "两者都有"});
-            this.dpFormat_comboBox.Location = new System.Drawing.Point(76, 65);
+            this.dpFormat_comboBox.Location = new System.Drawing.Point(76, 68);
             this.dpFormat_comboBox.Name = "dpFormat_comboBox";
-            this.dpFormat_comboBox.Size = new System.Drawing.Size(121, 25);
+            this.dpFormat_comboBox.Size = new System.Drawing.Size(177, 25);
             this.dpFormat_comboBox.TabIndex = 3;
             // 
             // dpType_comboBox
@@ -2009,13 +2056,215 @@ namespace TableMagic
             "柱状图"});
             this.dpType_comboBox.Location = new System.Drawing.Point(78, 29);
             this.dpType_comboBox.Name = "dpType_comboBox";
-            this.dpType_comboBox.Size = new System.Drawing.Size(121, 25);
+            this.dpType_comboBox.Size = new System.Drawing.Size(175, 25);
             this.dpType_comboBox.TabIndex = 2;
+            // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.Location = new System.Drawing.Point(15, 68);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(56, 17);
+            this.label44.TabIndex = 1;
+            this.label44.Text = "动图格式";
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Location = new System.Drawing.Point(15, 29);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(56, 17);
+            this.label45.TabIndex = 0;
+            this.label45.Text = "图表类型";
+            // 
+            // skipHeader_checkBox
+            // 
+            this.skipHeader_checkBox.AutoSize = true;
+            this.skipHeader_checkBox.Checked = true;
+            this.skipHeader_checkBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.skipHeader_checkBox.Location = new System.Drawing.Point(176, 152);
+            this.skipHeader_checkBox.Name = "skipHeader_checkBox";
+            this.skipHeader_checkBox.Size = new System.Drawing.Size(99, 21);
+            this.skipHeader_checkBox.TabIndex = 23;
+            this.skipHeader_checkBox.Text = "是否跳过标题";
+            this.skipHeader_checkBox.UseVisualStyleBackColor = true;
+            // 
+            // dpValueDetails_comboBox
+            // 
+            this.dpValueDetails_comboBox.FormattingEnabled = true;
+            this.dpValueDetails_comboBox.Items.AddRange(new object[] {
+            "列标题",
+            "行标题"});
+            this.dpValueDetails_comboBox.Location = new System.Drawing.Point(234, 110);
+            this.dpValueDetails_comboBox.Name = "dpValueDetails_comboBox";
+            this.dpValueDetails_comboBox.Size = new System.Drawing.Size(86, 25);
+            this.dpValueDetails_comboBox.TabIndex = 22;
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(173, 110);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(56, 17);
+            this.label36.TabIndex = 21;
+            this.label36.Text = "数值选项";
+            // 
+            // dpItemDetails_comboBox
+            // 
+            this.dpItemDetails_comboBox.FormattingEnabled = true;
+            this.dpItemDetails_comboBox.Items.AddRange(new object[] {
+            "列标题",
+            "行标题"});
+            this.dpItemDetails_comboBox.Location = new System.Drawing.Point(75, 110);
+            this.dpItemDetails_comboBox.Name = "dpItemDetails_comboBox";
+            this.dpItemDetails_comboBox.Size = new System.Drawing.Size(86, 25);
+            this.dpItemDetails_comboBox.TabIndex = 20;
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(15, 110);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(56, 17);
+            this.label37.TabIndex = 19;
+            this.label37.Text = "类别选项";
+            // 
+            // dpGroupDetails_comboBox
+            // 
+            this.dpGroupDetails_comboBox.FormattingEnabled = true;
+            this.dpGroupDetails_comboBox.Items.AddRange(new object[] {
+            "列标题",
+            "行标题"});
+            this.dpGroupDetails_comboBox.Location = new System.Drawing.Point(234, 70);
+            this.dpGroupDetails_comboBox.Name = "dpGroupDetails_comboBox";
+            this.dpGroupDetails_comboBox.Size = new System.Drawing.Size(86, 25);
+            this.dpGroupDetails_comboBox.TabIndex = 18;
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(173, 70);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(56, 17);
+            this.label35.TabIndex = 17;
+            this.label35.Text = "分组选项";
+            // 
+            // dpSortType2_comboBox
+            // 
+            this.dpSortType2_comboBox.FormattingEnabled = true;
+            this.dpSortType2_comboBox.Items.AddRange(new object[] {
+            "降序",
+            "升序"});
+            this.dpSortType2_comboBox.Location = new System.Drawing.Point(75, 148);
+            this.dpSortType2_comboBox.Name = "dpSortType2_comboBox";
+            this.dpSortType2_comboBox.Size = new System.Drawing.Size(86, 25);
+            this.dpSortType2_comboBox.TabIndex = 13;
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(14, 151);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(56, 17);
+            this.label31.TabIndex = 12;
+            this.label31.Text = "排列顺序";
+            // 
+            // dpYTitle2_textBox
+            // 
+            this.dpYTitle2_textBox.Location = new System.Drawing.Point(234, 225);
+            this.dpYTitle2_textBox.Name = "dpYTitle2_textBox";
+            this.dpYTitle2_textBox.Size = new System.Drawing.Size(86, 23);
+            this.dpYTitle2_textBox.TabIndex = 11;
+            // 
+            // dpXTitle2_textBox
+            // 
+            this.dpXTitle2_textBox.Location = new System.Drawing.Point(76, 225);
+            this.dpXTitle2_textBox.Name = "dpXTitle2_textBox";
+            this.dpXTitle2_textBox.Size = new System.Drawing.Size(86, 23);
+            this.dpXTitle2_textBox.TabIndex = 10;
+            // 
+            // dpTitle2_textBox
+            // 
+            this.dpTitle2_textBox.ForeColor = System.Drawing.Color.LightGray;
+            this.dpTitle2_textBox.Location = new System.Drawing.Point(76, 187);
+            this.dpTitle2_textBox.Name = "dpTitle2_textBox";
+            this.dpTitle2_textBox.Size = new System.Drawing.Size(244, 23);
+            this.dpTitle2_textBox.TabIndex = 9;
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(173, 227);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(51, 17);
+            this.label30.TabIndex = 8;
+            this.label30.Text = "Y轴标题";
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(15, 227);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(52, 17);
+            this.label29.TabIndex = 7;
+            this.label29.Text = "X轴标题";
+            // 
+            // dpGroupBy2_comboBox
+            // 
+            this.dpGroupBy2_comboBox.FormattingEnabled = true;
+            this.dpGroupBy2_comboBox.Items.AddRange(new object[] {
+            "列标题",
+            "行标题"});
+            this.dpGroupBy2_comboBox.Location = new System.Drawing.Point(76, 70);
+            this.dpGroupBy2_comboBox.Name = "dpGroupBy2_comboBox";
+            this.dpGroupBy2_comboBox.Size = new System.Drawing.Size(86, 25);
+            this.dpGroupBy2_comboBox.TabIndex = 6;
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(15, 189);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(56, 17);
+            this.label28.TabIndex = 5;
+            this.label28.Text = "图表标题";
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(15, 70);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(56, 17);
+            this.label27.TabIndex = 4;
+            this.label27.Text = "分组方式";
+            // 
+            // dpFormat2_comboBox
+            // 
+            this.dpFormat2_comboBox.FormattingEnabled = true;
+            this.dpFormat2_comboBox.Items.AddRange(new object[] {
+            "HTML格式",
+            "GIF格式",
+            "两者都有"});
+            this.dpFormat2_comboBox.Location = new System.Drawing.Point(234, 30);
+            this.dpFormat2_comboBox.Name = "dpFormat2_comboBox";
+            this.dpFormat2_comboBox.Size = new System.Drawing.Size(86, 25);
+            this.dpFormat2_comboBox.TabIndex = 3;
+            // 
+            // dpType2_comboBox
+            // 
+            this.dpType2_comboBox.FormattingEnabled = true;
+            this.dpType2_comboBox.Items.AddRange(new object[] {
+            "条形图",
+            "柱状图"});
+            this.dpType2_comboBox.Location = new System.Drawing.Point(78, 29);
+            this.dpType2_comboBox.Name = "dpType2_comboBox";
+            this.dpType2_comboBox.Size = new System.Drawing.Size(84, 25);
+            this.dpType2_comboBox.TabIndex = 2;
             // 
             // label26
             // 
             this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(15, 65);
+            this.label26.Location = new System.Drawing.Point(173, 30);
             this.label26.Name = "label26";
             this.label26.Size = new System.Drawing.Size(56, 17);
             this.label26.TabIndex = 1;
@@ -2111,9 +2360,9 @@ namespace TableMagic
             // 
             this.label12.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label12.ForeColor = System.Drawing.Color.Teal;
-            this.label12.Location = new System.Drawing.Point(45, 171);
+            this.label12.Location = new System.Drawing.Point(29, 198);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(253, 142);
+            this.label12.Size = new System.Drawing.Size(286, 127);
             this.label12.TabIndex = 7;
             this.label12.Text = "注意：\r\n1. 词云图数据区域范围不包括标题行/列；\r\n2. 词云图功能会生成一个词频表，并将png格式的词云图插入该表。\r\n3. 动态图数据区域范围包括标题行/" +
     "列，如有多行/列标题，需选择紧挨数据的行/列标题；\r\n4.动态图支持生成交互式html、gif动图两种方式。\r\n";
@@ -2336,6 +2585,8 @@ namespace TableMagic
             this.pwd_flowLayoutPanel.PerformLayout();
             this.tabPage7.ResumeLayout(false);
             this.tabPage7.PerformLayout();
+            this.groupBoxDanamic2.ResumeLayout(false);
+            this.groupBoxDanamic2.PerformLayout();
             this.groupBoxDanamic.ResumeLayout(false);
             this.groupBoxDanamic.PerformLayout();
             this.groupBoxWordCloud.ResumeLayout(false);
@@ -2505,23 +2756,44 @@ namespace TableMagic
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.ComboBox prefix_comboBox;
         private System.Windows.Forms.TextBox customPrefix_textBox;
-        private System.Windows.Forms.GroupBox groupBoxDanamic;
+        private System.Windows.Forms.GroupBox groupBoxDanamic2;
         private System.Windows.Forms.Label label26;
         private System.Windows.Forms.Label label25;
-        private System.Windows.Forms.ComboBox dpFormat_comboBox;
-        private System.Windows.Forms.ComboBox dpType_comboBox;
+        private System.Windows.Forms.ComboBox dpFormat2_comboBox;
+        private System.Windows.Forms.ComboBox dpType2_comboBox;
         private System.Windows.Forms.Label label28;
         private System.Windows.Forms.Label label27;
         private System.Windows.Forms.Label label30;
         private System.Windows.Forms.Label label29;
-        private System.Windows.Forms.ComboBox dpGroupBy_comboBox;
+        private System.Windows.Forms.ComboBox dpGroupBy2_comboBox;
+        private System.Windows.Forms.TextBox dpYTitle2_textBox;
+        private System.Windows.Forms.TextBox dpXTitle2_textBox;
+        private System.Windows.Forms.TextBox dpTitle2_textBox;
+        private System.Windows.Forms.ComboBox dpSortType2_comboBox;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.ComboBox dpValueDetails_comboBox;
+        private System.Windows.Forms.Label label36;
+        private System.Windows.Forms.ComboBox dpItemDetails_comboBox;
+        private System.Windows.Forms.Label label37;
+        private System.Windows.Forms.ComboBox dpGroupDetails_comboBox;
+        private System.Windows.Forms.Label label35;
+        private System.Windows.Forms.CheckBox skipHeader_checkBox;
+        private System.Windows.Forms.ComboBox sheetType_select_comboBox;
+        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.GroupBox groupBoxDanamic;
+        private System.Windows.Forms.ComboBox dpSortType_comboBox;
+        private System.Windows.Forms.Label label39;
         private System.Windows.Forms.TextBox dpYTitle_textBox;
         private System.Windows.Forms.TextBox dpXTitle_textBox;
         private System.Windows.Forms.TextBox dpTitle_textBox;
-        private System.Windows.Forms.ComboBox dpSortType_comboBox;
-        private System.Windows.Forms.Label label31;
-        private System.Windows.Forms.Label label34;
-        private System.Windows.Forms.Label label33;
-        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.Label label40;
+        private System.Windows.Forms.Label label41;
+        private System.Windows.Forms.ComboBox dpGroupBy_comboBox;
+        private System.Windows.Forms.Label label42;
+        private System.Windows.Forms.Label label43;
+        private System.Windows.Forms.ComboBox dpFormat_comboBox;
+        private System.Windows.Forms.ComboBox dpType_comboBox;
+        private System.Windows.Forms.Label label44;
+        private System.Windows.Forms.Label label45;
     }
 }

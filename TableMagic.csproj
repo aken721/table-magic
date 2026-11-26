@@ -41,7 +41,7 @@
     <PublishUrl>ftp://localhost/</PublishUrl>
     <InstallUrl>http://localhost/TableMagic/</InstallUrl>
     <TargetCulture>zh-chs</TargetCulture>
-    <ApplicationVersion>2.5.2.0</ApplicationVersion>
+    <ApplicationVersion>2.5.2.1</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
