@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 
 $projectDir = "TableMagic.Cli"
 
@@ -46,7 +46,7 @@ Write-Host ""
 Write-Host "[4/4] Building NuGet tool package..." -ForegroundColor Yellow
 dotnet pack $projectDir -c Release -o ./nupkg
 if ($LASTEXITCODE -ne 0) { Write-Error "Pack failed!"; exit 1 }
-Write-Host "  -> nupkg/TableMagic.Cli.1.0.0.nupkg" -ForegroundColor Green
+Write-Host "  -> nupkg/TableMagic.Cli.2.5.2.1.nupkg" -ForegroundColor Green
 
 Write-Host ""
 Write-Host "Cleanup..." -ForegroundColor Yellow

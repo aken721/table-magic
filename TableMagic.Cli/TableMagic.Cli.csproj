@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>tablemagic</AssemblyName>
     <RootNamespace>TableMagic.Cli</RootNamespace>
-    <Version>2.5.1</Version>
+    <Version>2.5.2.1</Version>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <Description>TableMagic Excel Skill CLI &amp; MCP Server - 107 tools for Excel operations via MCP protocol</Description>
     <PackAsTool>true</PackAsTool>

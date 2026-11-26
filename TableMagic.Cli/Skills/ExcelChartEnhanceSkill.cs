@@ -22,8 +22,8 @@ public class ExcelChartEnhanceSkill : ISkill
         {
             new() { Name = "create_word_cloud", Description = "根据文本数据生成词云图片",
                 Parameters = P(new[]{"textColumn"}, new[]{"fileName","sheetName","maxWords","width","height","outputPath"}), RequiredParameters = new List<string>{"textColumn"} },
-            new() { Name = "create_dynamic_chart", Description = "创建动态图表（数据透视+基础图表）",
-                Parameters = P(new[]{"categoryColumn","valueColumn"}, new[]{"fileName","sheetName","chartType","title"}), RequiredParameters = new List<string>{"categoryColumn","valueColumn"} },
+            new() { Name = "create_dynamic_chart", Description = "创建动态图表。支持二维表(categoryColumn/valueColumn)和一维表(按分组列自动透视成二维表再生成图表)",
+                Parameters = P(new[]{"categoryColumn","valueColumn"}, new[]{"fileName","sheetName","chartType","title","tableType","dataOrientation","skipHeader","groupColumn","itemColumn","valueColumn1d"}), RequiredParameters = new List<string>{"categoryColumn","valueColumn"} },
             new() { Name = "create_comparison_chart", Description = "创建对比图（多系列数据对比）",
                 Parameters = P(new[]{"categoryColumn","valueColumns"}, new[]{"fileName","sheetName","chartType","title"}), RequiredParameters = new List<string>{"categoryColumn","valueColumns"} },
             new() { Name = "create_pareto_chart", Description = "创建帕累托图（二八分析）",
@@ -177,8 +177,11 @@ public class ExcelChartEnhanceSkill : ISkill
         var sheetName = GetStr(args, "sheetName");
         var chartType = GetStr(args, "chartType") ?? "column";
         var title = GetStr(args, "title");
+        bool oneDimension = string.Equals(GetStr(args, "tableType"), "1d", StringComparison.OrdinalIgnoreCase)
+                         || GetStr(args, "tableType") == "1";
+        bool skipHeader = GetStr(args, "skipHeader") != "false" && GetStr(args, "skipHeader") != "0";
 
-        if (string.IsNullOrEmpty(categoryColumn) || string.IsNullOrEmpty(valueColumn))
+        if (!oneDimension && (string.IsNullOrEmpty(categoryColumn) || string.IsNullOrEmpty(valueColumn)))
             return SkillResult.FromError("需要提供 categoryColumn 和 valueColumn");
 
         var wb = ResolveWorkbook(fileName);
@@ -188,14 +191,86 @@ public class ExcelChartEnhanceSkill : ISkill
         var lastCol = _provider.GetLastColumn(wb, sn);
 
         var headerRow = BuildHeaderMap(wb, sn, lastCol);
-        if (!headerRow.ContainsKey(categoryColumn) || !headerRow.ContainsKey(valueColumn))
-            return SkillResult.FromError("未找到指定的列");
+        var chartTitle = string.IsNullOrEmpty(title) ? "动态图表" : title;
+        string dataRange;
+        string usedSheet;
 
-        var chartTitle = string.IsNullOrEmpty(title) ? $"{categoryColumn} - {valueColumn}" : title;
-        var dataRange = $"{categoryColumn}1:{valueColumn}{lastRow}";
-        var result = _provider.CreateChart(wb, sn, dataRange, chartType, chartTitle);
+        if (oneDimension)
+        {
+            // 一维表：按指定的分组列/类别列/数值列读取，透视成二维表后生成图表
+            var groupCol = GetStr(args, "groupColumn") ?? categoryColumn;
+            var itemCol = GetStr(args, "itemColumn");
+            var valCol = GetStr(args, "valueColumn1d") ?? valueColumn;
+            if (string.IsNullOrEmpty(groupCol) || string.IsNullOrEmpty(itemCol) || string.IsNullOrEmpty(valCol))
+                return SkillResult.FromError("一维表模式需要提供 groupColumn、itemColumn、valueColumn1d");
+            if (!headerRow.ContainsKey(groupCol) || !headerRow.ContainsKey(itemCol) || !headerRow.ContainsKey(valCol))
+                return SkillResult.FromError("一维表模式下未找到指定的列（groupColumn/itemColumn/valueColumn1d）");
 
-        return SkillResult.Ok($"动态图表已创建\n类型: {chartType}\n类别: {categoryColumn}\n数值: {valueColumn}\n{result}");
+            int gIdx = headerRow[groupCol], iIdx = headerRow[itemCol], vIdx = headerRow[valCol];
+            int startRow = skipHeader ? 2 : 1;
+
+            // 读取一维数据并按分组名 → 类别名聚合（同一分组同一类别取最后一条）
+            var groups = new Dictionary<string, Dictionary<string, decimal>>();
+            var groupOrder = new List<string>();
+            var itemOrder = new List<string>();
+            for (int r = startRow; r <= lastRow; r++)
+            {
+                string g = _provider.GetCellValue(wb, sn, r, gIdx)?.ToString()?.Trim() ?? "";
+                string it = _provider.GetCellValue(wb, sn, r, iIdx)?.ToString()?.Trim() ?? "";
+                if (string.IsNullOrEmpty(g) || string.IsNullOrEmpty(it)) continue;
+                decimal val;
+                string rawVal = _provider.GetCellValue(wb, sn, r, vIdx)?.ToString() ?? "";
+                if (!decimal.TryParse(rawVal, out val)) continue;
+                if (!groups.ContainsKey(g)) { groups[g] = new Dictionary<string, decimal>(); groupOrder.Add(g); }
+                if (!groups[g].ContainsKey(it)) itemOrder.Add(it);
+                groups[g][it] = val;
+            }
+            if (groups.Count == 0)
+                return SkillResult.FromError("一维表未读取到有效数据（请检查 skipHeader 与列选择）");
+
+            // 写入临时 sheet 形成二维表：第一行为分组名，第一列为类别名
+            string pivotSheet = $"_动态图透视_{DateTime.Now:yyyyMMdd_HHmmss}";
+            _provider.CreateWorksheet(fileName!, pivotSheet);
+            _provider.SetCellValue(fileName!, pivotSheet, 1, 1, "类别");
+            for (int c = 0; c < groupOrder.Count; c++)
+                _provider.SetCellValue(fileName!, pivotSheet, 1, c + 2, groupOrder[c]);
+            for (int r = 0; r < itemOrder.Count; r++)
+            {
+                _provider.SetCellValue(fileName!, pivotSheet, r + 2, 1, itemOrder[r]);
+                for (int c = 0; c < groupOrder.Count; c++)
+                {
+                    decimal v;
+                    _provider.SetCellValue(fileName!, pivotSheet, r + 2, c + 2,
+                        groups[groupOrder[c]].TryGetValue(itemOrder[r], out v) ? (object)v : "");
+                }
+            }
+            usedSheet = pivotSheet;
+            dataRange = $"A1:{ColLetter(groupOrder.Count + 1)}{itemOrder.Count + 1}";
+        }
+        else
+        {
+            if (!headerRow.ContainsKey(categoryColumn!) || !headerRow.ContainsKey(valueColumn!))
+                return SkillResult.FromError("未找到指定的列");
+            usedSheet = sn;
+            dataRange = $"{categoryColumn}1:{valueColumn}{lastRow}";
+        }
+
+        var result = _provider.CreateChart(wb, usedSheet, dataRange, chartType, chartTitle);
+        string mode = oneDimension ? "一维表→二维表" : "二维表";
+        return SkillResult.Ok($"动态图表已创建（{mode}）\n类型: {chartType}\n标题: {chartTitle}\n数据范围: {dataRange}\n{result}");
+    }
+
+    /// <summary>列索引(1-based)转 Excel 列字母</summary>
+    private static string ColLetter(int index)
+    {
+        string s = "";
+        while (index > 0)
+        {
+            int rem = (index - 1) % 26;
+            s = (char)('A' + rem) + s;
+            index = (index - 1) / 26;
+        }
+        return s;
     }
 
     private SkillResult CreateComparisonChart(Dictionary<string, object> args)

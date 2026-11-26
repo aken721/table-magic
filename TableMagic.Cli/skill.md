@@ -3,7 +3,7 @@
 ## 元数据
 
 - **名称**: tablemagic
-- **版本**: 2.5.1
+- **版本**: 2.5.2.1
 - **描述**: Excel 操作技能，提供工作簿/工作表/单元格/区域/格式/图表/分析/数据库/API/邮件/文件/二维码/发票/正则/目录/定时/PDF等 111 个工具
 - **协议**: MCP (Model Context Protocol) 2024-11-05
 - **传输**: stdio
@@ -286,7 +286,7 @@ E:\SourceCode\Csharp\TableMagic\TableMagic.Cli\bin\Release\net8.0\tablemagic.exe
 
 | 工具 | 描述 | 必需参数 | 可选参数 |
 |------|------|---------|---------|
-| `connect_database` | 连接数据库获取表列表 | dbType, connectionString | 无 |
+| `connect_database` | 连接数据库获取表列表 | dbType, connectionString | host, port, database, user, password（PostgreSQL 分散字段，优先于 connectionString） |
 | `execute_query` | 执行SQL查询写入Excel | dbType, connectionString, query | outputFileName, outputSheetName |
 | `export_table_to_excel` | 导出数据库表到Excel | dbType, connectionString, tableName | outputFileName, outputSheetName |
 | `get_table_structure` | 获取表结构信息 | dbType, connectionString, tableName | 无 |
@@ -303,7 +303,7 @@ E:\SourceCode\Csharp\TableMagic\TableMagic.Cli\bin\Release\net8.0\tablemagic.exe
 | 工具 | 描述 | 必需参数 | 可选参数 |
 |------|------|---------|---------|
 | `create_word_cloud` | 生成词云 | textColumn | fileName, sheetName, maxWords, width, height |
-| `create_dynamic_chart` | 创建动态图表 | dataRange | fileName, sheetName, chartType, title |
+| `create_dynamic_chart` | 创建动态图表（支持二维表/一维表，一维表自动透视成二维表） | categoryColumn, valueColumn（二维表）；一维表另需 groupColumn, itemColumn, valueColumn1d | fileName, sheetName, chartType, title, tableType(2d/1d), skipHeader |
 | `create_comparison_chart` | 创建对比图 | dataRange | fileName, sheetName, title |
 | `create_pareto_chart` | 创建帕累托图 | dataRange, valueColumn, categoryColumn | fileName, sheetName |
 | `create_histogram` | 创建直方图 | dataRange | fileName, sheetName, binCount |

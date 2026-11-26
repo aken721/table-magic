@@ -47,7 +47,12 @@ namespace TableMagic.Skills
                                 { "valueColumn", new { type = "string", description = "数值列名" } },
                                 { "timeColumn", new { type = "string", description = "时间列名（可选，用于动态展示）" } },
                                 { "chartType", new { type = "string", description = "图表类型：bar/line/pie/scatter，默认bar" } },
-                                { "sheetName", new { type = "string", description = "工作表名称（可选）" } }
+                                { "sheetName", new { type = "string", description = "工作表名称（可选）" } },
+                                { "tableType", new { type = "string", description = "表格类型：2d(默认)/1d(一维表自动透视成二维表)" } },
+                                { "groupColumn", new { type = "string", description = "一维表分组列（如 period，按年份分组）" } },
+                                { "itemColumn", new { type = "string", description = "一维表类别列（如 region_name，各省）" } },
+                                { "valueColumn1d", new { type = "string", description = "一维表数值列（如 value，GDP）" } },
+                                { "skipHeader", new { type = "string", description = "是否跳过首行表头，默认true" } },
                             }
                         }
                     },
@@ -252,6 +257,9 @@ namespace TableMagic.Skills
             var timeColumn = arguments.ContainsKey("timeColumn") ? arguments["timeColumn"].ToString() : null;
             var chartType = arguments.ContainsKey("chartType") ? arguments["chartType"].ToString().ToLower() : "bar";
             var sheetName = arguments.ContainsKey("sheetName") ? arguments["sheetName"].ToString() : null;
+            string tableType = arguments.ContainsKey("tableType") ? arguments["tableType"].ToString().ToLower() : "2d";
+            bool oneDimension = tableType == "1d";
+            bool skipHeader = !arguments.ContainsKey("skipHeader") || arguments["skipHeader"].ToString() != "false";
 
             var workbook = ThisAddIn.app.ActiveWorkbook;
             var sheet = string.IsNullOrEmpty(sheetName) ? workbook.ActiveSheet : workbook.Worksheets[sheetName];
@@ -268,11 +276,65 @@ namespace TableMagic.Skills
                     columnMap[colName] = c;
             }
 
-            if (!columnMap.ContainsKey(categoryColumn) || !columnMap.ContainsKey(valueColumn))
-                return Task.FromResult(new SkillResult { Success = false, Error = "未找到指定的列" });
+            Excel.Worksheet chartSheet = sheet;
+            string dataRangeText;
+            string chartTitleText;
 
-            int catColIdx = columnMap[categoryColumn];
-            int valColIdx = columnMap[valueColumn];
+            if (oneDimension)
+            {
+                // 一维表：按分组列/类别列/数值列读取，透视成二维表后生成图表
+                string groupColumn = arguments.ContainsKey("groupColumn") ? arguments["groupColumn"].ToString() : categoryColumn;
+                string itemColumn = arguments.ContainsKey("itemColumn") ? arguments["itemColumn"].ToString() : null;
+                string valueColumn1d = arguments.ContainsKey("valueColumn1d") ? arguments["valueColumn1d"].ToString() : valueColumn;
+                if (string.IsNullOrEmpty(itemColumn) || !columnMap.ContainsKey(groupColumn) ||
+                    !columnMap.ContainsKey(itemColumn) || !columnMap.ContainsKey(valueColumn1d))
+                    return Task.FromResult(new SkillResult { Success = false, Error = "一维表模式需要有效的 groupColumn/itemColumn/valueColumn1d" });
+
+                int gIdx = columnMap[groupColumn], iIdx = columnMap[itemColumn], vIdx = columnMap[valueColumn1d];
+                int startRow = skipHeader ? 2 : 1;
+                var groups = new Dictionary<string, Dictionary<string, decimal>>();
+                var groupOrder = new List<string>();
+                var itemOrder = new List<string>();
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    string g = sheet.Cells[r, gIdx].Text?.ToString()?.Trim() ?? "";
+                    string it = sheet.Cells[r, iIdx].Text?.ToString()?.Trim() ?? "";
+                    if (string.IsNullOrEmpty(g) || string.IsNullOrEmpty(it)) continue;
+                    decimal val;
+                    if (!decimal.TryParse(sheet.Cells[r, vIdx].Text?.ToString(), out val)) continue;
+                    if (!groups.ContainsKey(g)) { groups[g] = new Dictionary<string, decimal>(); groupOrder.Add(g); }
+                    if (!groups[g].ContainsKey(it)) itemOrder.Add(it);
+                    groups[g][it] = val;
+                }
+                if (groups.Count == 0 || itemOrder.Count == 0)
+                    return Task.FromResult(new SkillResult { Success = false, Error = "一维表未读取到有效数据" });
+
+                // 新建透视 sheet
+                string pivotName = "_动态图透视_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var pivot = workbook.Worksheets.Add(After: workbook.Worksheets[workbook.Worksheets.Count]);
+                pivot.Name = pivotName;
+                pivot.Cells[1, 1].Value = "类别";
+                for (int c = 0; c < groupOrder.Count; c++) pivot.Cells[1, c + 2].Value = groupOrder[c];
+                for (int r = 0; r < itemOrder.Count; r++)
+                {
+                    pivot.Cells[r + 2, 1].Value = itemOrder[r];
+                    for (int c = 0; c < groupOrder.Count; c++)
+                    {
+                        decimal v;
+                        pivot.Cells[r + 2, c + 2].Value = groups[groupOrder[c]].TryGetValue(itemOrder[r], out v) ? (object)v : "";
+                    }
+                }
+                chartSheet = pivot;
+                dataRangeText = $"A1:{ColLetter(groupOrder.Count + 1)}{itemOrder.Count + 1}";
+                chartTitleText = string.IsNullOrEmpty(titleArg(arguments)) ? "动态图表（一维表）" : titleArg(arguments);
+            }
+            else
+            {
+                if (!columnMap.ContainsKey(categoryColumn) || !columnMap.ContainsKey(valueColumn))
+                    return Task.FromResult(new SkillResult { Success = false, Error = "未找到指定的列" });
+                dataRangeText = $"${categoryColumn}$1:${categoryColumn}${lastRow},${valueColumn}$1:${valueColumn}${lastRow}";
+                chartTitleText = $"{categoryColumn} - {valueColumn}";
+            }
 
             var xlChartType = chartType switch
             {
@@ -282,20 +344,17 @@ namespace TableMagic.Skills
                 _ => Excel.XlChartType.xlColumnClustered
             };
 
-            var chart = sheet.Shapes.AddChart2(
+            var chart = chartSheet.Shapes.AddChart2(
                 Style: -1,
                 XlChartType: xlChartType,
-                Left: sheet.Cells[1, lastCol + 2].Left,
-                Top: sheet.Cells[1, lastCol + 2].Top,
+                Left: chartSheet.Cells[1, lastCol + 2].Left,
+                Top: chartSheet.Cells[1, lastCol + 2].Top,
                 Width: 500,
                 Height: 350
             ).Chart;
-
-            var dataRange = sheet.Range[$"${categoryColumn}$1:${categoryColumn}${lastRow},${valueColumn}$1:${valueColumn}${lastRow}"];
-            chart.SetSourceData(dataRange);
-
+            chart.SetSourceData(chartSheet.Range[dataRangeText]);
             chart.HasTitle = true;
-            chart.ChartTitle.Text = $"{categoryColumn} - {valueColumn}";
+            chart.ChartTitle.Text = chartTitleText;
 
             if (chartType == "bar" || chartType == "line")
             {
@@ -305,7 +364,25 @@ namespace TableMagic.Skills
                 chart.Axes(Excel.XlAxisType.xlValue).AxisTitle.Text = valueColumn;
             }
 
-            return Task.FromResult(new SkillResult { Success = true, Content = $"动态图表已创建\n类型: {chartType}\n类别: {categoryColumn}\n数值: {valueColumn}" });
+            string mode = oneDimension ? "一维表→二维表" : "二维表";
+            return Task.FromResult(new SkillResult { Success = true, Content = $"动态图表已创建（{mode}）\n类型: {chartType}\n标题: {chartTitleText}" });
+        }
+
+        private static string titleArg(Dictionary<string, object> arguments)
+        {
+            return arguments.ContainsKey("title") ? arguments["title"].ToString() : null;
+        }
+
+        private static string ColLetter(int index)
+        {
+            string s = "";
+            while (index > 0)
+            {
+                int rem = (index - 1) % 26;
+                s = (char)('A' + rem) + s;
+                index = (index - 1) / 26;
+            }
+            return s;
         }
 
         private Task<SkillResult> CreateComparisonChartAsync(Dictionary<string, object> arguments)

@@ -26,7 +26,7 @@ TableMagic 通用型 Skill，可作为 MCP 服务器在 openclaw、hermes、work
 | Word 文档 | 批量生成 Word 文档、预览 | 2 |
 | PDF 导出 | 单表/全簿/批量/区域导出为 PDF（QuestPDF） | 4 |
 
-**共 111 个工具** | **版本 2.5.1**
+**共 111 个工具** | **版本 2.5.2.1**
 
 ## 安装
 
@@ -244,7 +244,7 @@ tablemagic batch calls.json
 | 工具 | 描述 | 必需参数 | 可选参数 |
 |------|------|---------|---------|
 | `create_word_cloud` | 根据文本列生成词云图片 | textColumn | fileName, sheetName, maxWords, width, height, outputPath |
-| `create_dynamic_chart` | 创建动态图表（数据透视+基础图表） | categoryColumn, valueColumn | fileName, sheetName, chartType, title |
+| `create_dynamic_chart` | 创建动态图表（支持二维表/一维表自动透视） | categoryColumn, valueColumn | fileName, sheetName, chartType, title, tableType(2d/1d), groupColumn, itemColumn, valueColumn1d, skipHeader |
 | `create_comparison_chart` | 创建多系列对比图 | categoryColumn, valueColumns | fileName, sheetName, chartType, title |
 | `create_pareto_chart` | 创建帕累托图（二八分析） | categoryColumn, valueColumn | fileName, sheetName |
 | `create_histogram` | 创建直方图 | valueColumn | fileName, sheetName, binCount |

@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using TableMagic.Cli.Skills;
 
@@ -94,7 +94,7 @@ public class McpServer
             ServerInfo = new ServerInfo
             {
                 Name = "tablemagic",
-                Version = typeof(McpServer).Assembly.GetName().Version?.ToString(3) ?? "2.5.1"
+                Version = typeof(McpServer).Assembly.GetName().Version?.ToString(3) ?? "2.5.2.1"
             }
         };
 

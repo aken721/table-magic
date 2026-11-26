@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
 using System.Data.SQLite;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -28,7 +30,12 @@ namespace TableMagic.Skills
                         { "properties", new Dictionary<string, object>
                             {
                                 { "dbType", new { type = "string", description = "数据库类型：sqlserver/mysql/postgresql/access/sqlite" } },
-                                { "connectionString", new { type = "string", description = "数据库连接字符串或文件路径" } }
+                                { "connectionString", new { type = "string", description = "数据库连接字符串或文件路径（PostgreSQL 也可用下面的分散字段）" } },
+                                { "host", new { type = "string", description = "PostgreSQL 主机名（可选，提供时优先于 connectionString）" } },
+                                { "port", new { type = "string", description = "PostgreSQL 端口，默认5432（可选）" } },
+                                { "database", new { type = "string", description = "PostgreSQL 数据库名（可选）" } },
+                                { "user", new { type = "string", description = "PostgreSQL 用户名（可选）" } },
+                                { "password", new { type = "string", description = "PostgreSQL 密码（可选）" } }
                             }
                         }
                     },
@@ -110,7 +117,8 @@ namespace TableMagic.Skills
             }
             catch (Exception ex)
             {
-                return new SkillResult { Success = false, Error = ex.Message };
+                LogError(toolName, ex);
+                return new SkillResult { Success = false, Error = "数据库操作失败：" + ex.Message };
             }
         }
 
@@ -120,6 +128,8 @@ namespace TableMagic.Skills
             {
                 var dbType = arguments["dbType"].ToString().ToLower();
                 var connectionString = arguments["connectionString"].ToString();
+                if (dbType == "postgresql")
+                    connectionString = BuildPostgreSqlConnectionString(arguments, connectionString);
 
                 try
                 {
@@ -143,6 +153,8 @@ namespace TableMagic.Skills
             {
                 var dbType = arguments["dbType"].ToString().ToLower();
                 var connectionString = arguments["connectionString"].ToString();
+                if (dbType == "postgresql")
+                    connectionString = BuildPostgreSqlConnectionString(arguments, connectionString);
                 var query = arguments["query"].ToString();
                 var outputSheetName = arguments.ContainsKey("outputSheetName") 
                     ? arguments["outputSheetName"].ToString() 
@@ -169,6 +181,8 @@ namespace TableMagic.Skills
         {
             var dbType = arguments["dbType"].ToString().ToLower();
             var connectionString = arguments["connectionString"].ToString();
+            if (dbType == "postgresql")
+                connectionString = BuildPostgreSqlConnectionString(arguments, connectionString);
             var tableName = arguments["tableName"].ToString();
             var outputSheetName = arguments.ContainsKey("outputSheetName") 
                 ? arguments["outputSheetName"].ToString() 
@@ -178,7 +192,7 @@ namespace TableMagic.Skills
             {
                 { "dbType", dbType },
                 { "connectionString", connectionString },
-                { "query", $"SELECT * FROM [{tableName}]" },
+                { "query", $"SELECT * FROM {QuoteTableName(dbType, tableName)}" },
                 { "outputSheetName", outputSheetName }
             });
         }
@@ -189,15 +203,18 @@ namespace TableMagic.Skills
             {
                 var dbType = arguments["dbType"].ToString().ToLower();
                 var connectionString = arguments["connectionString"].ToString();
+                if (dbType == "postgresql")
+                    connectionString = BuildPostgreSqlConnectionString(arguments, connectionString);
                 var tableName = arguments["tableName"].ToString();
+                string pgTableName = tableName.Contains('.') ? tableName.Split('.').Last() : tableName;
 
                 try
                 {
                     var query = dbType switch
                     {
-                        "sqlserver" => $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tableName}'",
-                        "mysql" => $"DESCRIBE {tableName}",
-                        "postgresql" => $"SELECT column_name, data_type, character_maximum_length, is_nullable FROM information_schema.columns WHERE table_name = '{tableName}'",
+                        "sqlserver" => $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tableName.Replace("'", "''")}'",
+                        "mysql" => $"DESCRIBE {QuoteTableName(dbType, tableName)}",
+                        "postgresql" => $"SELECT column_name, data_type, character_maximum_length, is_nullable FROM information_schema.columns WHERE table_name = '{pgTableName.Replace("'", "''")}' ORDER BY ordinal_position",
                         "access" or "sqlite" => $"PRAGMA table_info({tableName})",
                         _ => throw new NotSupportedException($"不支持的数据库类型: {dbType}")
                     };
@@ -251,11 +268,26 @@ namespace TableMagic.Skills
 
                 case "sqlserver":
                 case "mysql":
-                case "postgresql":
-                    var query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'";
-                    var dt = ExecuteQuery(dbType, connectionString, query);
+                    var dt = ExecuteQuery(dbType, connectionString, "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'");
                     foreach (DataRow row in dt.Rows)
                         tableNames.Add(row[0].ToString());
+                    break;
+
+                case "postgresql":
+                    // 排除系统 schema，非 public schema 用 schema.table 形式显示（与 VSTO 版一致）
+                    const string pgSql = @"
+                        SELECT table_schema, table_name
+                        FROM information_schema.tables
+                        WHERE table_type IN ('BASE TABLE', 'VIEW')
+                          AND table_schema NOT IN ('pg_catalog', 'information_schema')
+                        ORDER BY table_schema, table_name";
+                    var pgDt = ExecuteQuery(dbType, connectionString, pgSql);
+                    foreach (DataRow row in pgDt.Rows)
+                    {
+                        string schema = row[0].ToString() ?? "";
+                        string name = row[1].ToString() ?? "";
+                        tableNames.Add(schema == "public" ? name : schema + "." + name);
+                    }
                     break;
 
                 default:
@@ -363,6 +395,73 @@ namespace TableMagic.Skills
 
             ThisAddIn.app.ScreenUpdating = true;
             ThisAddIn.app.DisplayAlerts = true;
+        }
+
+        private static readonly object _logLock = new object();
+
+        /// <summary>记录数据库错误到 %LOCALAPPDATA%\TableMagic\logs\database.log（与 VSTO 主程序一致）</summary>
+        private static void LogError(string context, Exception ex)
+        {
+            try
+            {
+                string logDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "TableMagic", "logs");
+                Directory.CreateDirectory(logDir);
+                string content = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Skill {context}{Environment.NewLine}{ex}{Environment.NewLine}{Environment.NewLine}";
+                lock (_logLock)
+                {
+                    File.AppendAllText(Path.Combine(logDir, "database.log"), content, Encoding.UTF8);
+                }
+            }
+            catch { /* 日志失败不能影响主流程 */ }
+        }
+
+        /// <summary>根据 dbType 生成带正确引号的表名（PostgreSQL 用双引号，SQL Server/MySQL 用方括号）</summary>
+        private static string QuoteTableName(string dbType, string tableName)
+        {
+            if (string.IsNullOrWhiteSpace(tableName)) return tableName;
+            if (dbType == "postgresql")
+            {
+                var parts = tableName.Trim().Trim('"').Split('.');
+                for (int i = 0; i < parts.Length; i++)
+                    parts[i] = "\"" + parts[i].Replace("\"", "\"\"") + "\"";
+                return string.Join(".", parts);
+            }
+            if (dbType == "sqlserver" || dbType == "mysql")
+            {
+                var parts = tableName.Trim().Trim('[', ']').Split('.');
+                for (int i = 0; i < parts.Length; i++)
+                    parts[i] = "[" + parts[i].Replace("]", "]]") + "]";
+                return string.Join(".", parts);
+            }
+            return tableName;
+        }
+
+        /// <summary>由分散字段构建 PostgreSQL 连接串（与 VSTO 版 BuildPostgreSqlConnectionString 对齐）</summary>
+        private static string BuildPostgreSqlConnectionString(Dictionary<string, object> args, string fallback)
+        {
+            string host = args.ContainsKey("host") ? args["host"]?.ToString() : null;
+            string database = args.ContainsKey("database") ? args["database"]?.ToString() : null;
+            string user = args.ContainsKey("user") ? args["user"]?.ToString() : null;
+            string password = args.ContainsKey("password") ? args["password"]?.ToString() : null;
+            if (string.IsNullOrWhiteSpace(host) && string.IsNullOrWhiteSpace(database))
+                return fallback;
+
+            var csb = new Npgsql.NpgsqlConnectionStringBuilder
+            {
+                Host = host ?? string.Empty,
+                Username = user ?? string.Empty,
+                Password = password ?? string.Empty,
+                Database = database ?? string.Empty,
+                Timeout = 15,
+                CommandTimeout = 60
+            };
+            int port;
+            string portStr = args.ContainsKey("port") ? args["port"]?.ToString() : null;
+            if (int.TryParse(portStr, out port) && port > 0 && port <= 65535)
+                csb.Port = port;
+            return csb.ConnectionString;
         }
     }
 }

@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using TableMagic.Cli.Excel;
 
@@ -29,7 +31,12 @@ public class ExcelDatabaseSkill : ISkill
                     { "properties", new Dictionary<string, object>
                         {
                             { "dbType", new { type = "string", description = "数据库类型：sqlserver/mysql/postgresql/sqlite" } },
-                            { "connectionString", new { type = "string", description = "数据库连接字符串或文件路径" } }
+                            { "connectionString", new { type = "string", description = "数据库连接字符串或文件路径（PostgreSQL 也可用下面的分散字段）" } },
+                            { "host", new { type = "string", description = "PostgreSQL 主机名（可选，提供时优先于 connectionString）" } },
+                            { "port", new { type = "string", description = "PostgreSQL 端口，默认5432（可选）" } },
+                            { "database", new { type = "string", description = "PostgreSQL 数据库名（可选）" } },
+                            { "user", new { type = "string", description = "PostgreSQL 用户名（可选）" } },
+                            { "password", new { type = "string", description = "PostgreSQL 密码（可选）" } }
                         }
                     }
                 },
@@ -106,7 +113,11 @@ public class ExcelDatabaseSkill : ISkill
                 _ => new SkillResult { Success = false, Error = $"未知工具: {toolName}" }
             };
         }
-        catch (Exception ex) { return new SkillResult { Success = false, Error = ex.Message }; }
+        catch (Exception ex)
+        {
+            LogError(toolName, ex);
+            return new SkillResult { Success = false, Error = "数据库操作失败：" + ex.Message };
+        }
     }
 
     private async Task<SkillResult> ConnectDatabaseAsync(Dictionary<string, object> args)
@@ -115,7 +126,9 @@ public class ExcelDatabaseSkill : ISkill
         {
             var dbType = GetStr(args, "dbType")?.ToLower();
             var connStr = GetStr(args, "connectionString");
-            var tables = GetTableNames(dbType!, connStr!);
+            if (dbType == "postgresql")
+                connStr = BuildPostgreSqlConnectionString(args, connStr);
+            var tables = GetTableNames(dbType!, connStr!, args);
             return SkillResult.Ok($"数据库连接成功，共 {tables.Count} 张表：\n{string.Join("\n", tables)}");
         });
     }
@@ -126,6 +139,8 @@ public class ExcelDatabaseSkill : ISkill
         {
             var dbType = GetStr(args, "dbType")?.ToLower();
             var connStr = GetStr(args, "connectionString");
+            if (dbType == "postgresql")
+                connStr = BuildPostgreSqlConnectionString(args, connStr);
             var query = GetStr(args, "query");
             var outputFn = GetStr(args, "outputFileName");
             var outputSn = GetStr(args, "outputSheetName") ?? "查询结果";
@@ -138,9 +153,11 @@ public class ExcelDatabaseSkill : ISkill
 
     private async Task<SkillResult> ExportTableAsync(Dictionary<string, object> args)
     {
+        var dbType = GetStr(args, "dbType")?.ToLower();
+        var tableName = GetStr(args, "tableName");
         var newArgs = new Dictionary<string, object>(args)
         {
-            ["query"] = $"SELECT * FROM [{GetStr(args, "tableName")}]"
+            ["query"] = $"SELECT * FROM {QuoteTableName(dbType!, tableName!)}"
         };
         if (!newArgs.ContainsKey("outputSheetName"))
             newArgs["outputSheetName"] = GetStr(args, "tableName") ?? "导出表";
@@ -153,13 +170,16 @@ public class ExcelDatabaseSkill : ISkill
         {
             var dbType = GetStr(args, "dbType")?.ToLower();
             var connStr = GetStr(args, "connectionString");
+            if (dbType == "postgresql")
+                connStr = BuildPostgreSqlConnectionString(args, connStr);
             var tableName = GetStr(args, "tableName");
+            string pgTableName = tableName != null && tableName.Contains('.') ? tableName.Split('.').Last() : tableName ?? "";
             var query = dbType switch
             {
                 "sqlite" => $"PRAGMA table_info({tableName})",
-                "mysql" => $"DESCRIBE {tableName}",
-                "postgresql" => $"SELECT column_name, data_type, character_maximum_length, is_nullable FROM information_schema.columns WHERE table_name = '{tableName}'",
-                "sqlserver" => $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tableName}'",
+                "mysql" => $"DESCRIBE {QuoteTableName(dbType, tableName!)}",
+                "postgresql" => $"SELECT column_name, data_type, character_maximum_length, is_nullable FROM information_schema.columns WHERE table_name = '{pgTableName?.Replace("'", "''")}' ORDER BY ordinal_position",
+                "sqlserver" => $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tableName?.Replace("'", "''")}'",
                 _ => throw new NotSupportedException($"不支持的数据库类型: {dbType}")
             };
             var dt = ExecuteDbQuery(dbType, connStr, query);
@@ -169,7 +189,7 @@ public class ExcelDatabaseSkill : ISkill
         });
     }
 
-    private List<string> GetTableNames(string dbType, string connStr)
+    private List<string> GetTableNames(string dbType, string connStr, Dictionary<string, object>? args = null)
     {
         var tables = new List<string>();
         switch (dbType)
@@ -183,8 +203,23 @@ public class ExcelDatabaseSkill : ISkill
                     while (reader.Read()) tables.Add(reader["name"].ToString()!);
                 }
                 break;
-            case "mysql":
             case "postgresql":
+                // 排除系统 schema，非 public schema 用 schema.table 形式显示（与 VSTO 版一致）
+                const string pgSql = @"
+                    SELECT table_schema, table_name
+                    FROM information_schema.tables
+                    WHERE table_type IN ('BASE TABLE', 'VIEW')
+                      AND table_schema NOT IN ('pg_catalog', 'information_schema')
+                    ORDER BY table_schema, table_name";
+                var pgDt = ExecuteDbQuery(dbType, connStr, pgSql);
+                foreach (DataRow row in pgDt.Rows)
+                {
+                    string schema = row[0].ToString() ?? "";
+                    string name = row[1].ToString() ?? "";
+                    tables.Add(schema == "public" ? name : schema + "." + name);
+                }
+                break;
+            case "mysql":
             case "sqlserver":
                 var dt = ExecuteDbQuery(dbType, connStr, "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'");
                 foreach (DataRow row in dt.Rows) tables.Add(row[0].ToString()!);
@@ -209,7 +244,11 @@ public class ExcelDatabaseSkill : ISkill
                 break;
             case "postgresql":
                 using (var conn = new Npgsql.NpgsqlConnection(connStr))
-                using (var adapter = new Npgsql.NpgsqlDataAdapter(query, conn)) { adapter.Fill(dt); }
+                {
+                    conn.Open();
+                    using var adapter = new Npgsql.NpgsqlDataAdapter(query, conn);
+                    adapter.Fill(dt);
+                }
                 break;
             case "sqlserver":
                 using (var conn = new Microsoft.Data.SqlClient.SqlConnection(connStr))
@@ -243,6 +282,73 @@ public class ExcelDatabaseSkill : ISkill
                 _provider.SetCellValue(fn, sheetName, r + 2, c + 1, dt.Rows[r][c]);
 
         _provider.SaveWorkbook(fn);
+    }
+
+    /// <summary>记录数据库错误到 %LOCALAPPDATA%\TableMagic\logs\database.log（不打断主流程）</summary>
+    private static void LogError(string context, Exception ex)
+    {
+        try
+        {
+            string logDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "TableMagic", "logs");
+            Directory.CreateDirectory(logDir);
+            string content = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] CLI {context}{Environment.NewLine}{ex}{Environment.NewLine}{Environment.NewLine}";
+            lock (_logLock)
+            {
+                File.AppendAllText(Path.Combine(logDir, "database.log"), content, Encoding.UTF8);
+            }
+        }
+        catch { /* 日志失败不能影响主流程 */ }
+    }
+
+    private static readonly object _logLock = new object();
+
+    /// <summary>根据 dbType 生成带正确引号的表名（PostgreSQL 用双引号，SQL Server 用方括号）</summary>
+    private static string QuoteTableName(string dbType, string tableName)
+    {
+        if (string.IsNullOrWhiteSpace(tableName)) return tableName;
+        if (dbType == "postgresql")
+        {
+            // 非 public schema 名如 sales.orders，需逐段加引号；自动兼容已带引号的情况
+            var parts = tableName.Trim().Trim('"').Split('.');
+            for (int i = 0; i < parts.Length; i++)
+                parts[i] = "\"" + parts[i].Replace("\"", "\"\"") + "\"";
+            return string.Join(".", parts);
+        }
+        if (dbType == "sqlserver" || dbType == "mysql")
+        {
+            var parts = tableName.Trim().Trim('[', ']').Split('.');
+            for (int i = 0; i < parts.Length; i++)
+                parts[i] = "[" + parts[i].Replace("]", "]]") + "]";
+            return string.Join(".", parts);
+        }
+        return tableName; // SQLite 不加引号时会原样传递
+    }
+
+    /// <summary>由分散字段构建 PostgreSQL 连接串（与 VSTO 版 BuildPostgreSqlConnectionString 对齐）</summary>
+    private static string BuildPostgreSqlConnectionString(Dictionary<string, object> args, string fallback)
+    {
+        string host = GetStr(args, "host");
+        string database = GetStr(args, "database");
+        string user = GetStr(args, "user");
+        string password = GetStr(args, "password");
+        int port;
+        if (string.IsNullOrWhiteSpace(host) && string.IsNullOrWhiteSpace(database))
+            return fallback; // 没有分散字段时使用传入的原始连接串
+
+        var csb = new Npgsql.NpgsqlConnectionStringBuilder
+        {
+            Host = host ?? string.Empty,
+            Username = user ?? string.Empty,
+            Password = password ?? string.Empty,
+            Database = database ?? string.Empty,
+            Timeout = 15,
+            CommandTimeout = 60
+        };
+        if (int.TryParse(GetStr(args, "port"), out port) && port > 0 && port <= 65535)
+            csb.Port = port;
+        return csb.ConnectionString;
     }
 
     private static string GetStr(Dictionary<string, object> a, string k) => (a.ContainsKey(k) ? a[k]?.ToString() : null)!;
